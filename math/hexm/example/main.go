@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gitchander/hexm"
+	"github.com/gitchander/heuristic/math/hexm"
 	"math/rand"
 	"time"
 )

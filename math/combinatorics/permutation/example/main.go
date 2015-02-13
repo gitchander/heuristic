@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	perm "github.com/gitchander/permutation"
+	perm "github.com/gitchander/heuristic/math/combinatorics/permutation"
 )
 
 func Example1() {

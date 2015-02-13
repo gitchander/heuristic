@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	. "github.com/gitchander/heuristic/ternary"
+	. "github.com/gitchander/heuristic/math/ternary"
 )
 
 func ExampleBoolean() {

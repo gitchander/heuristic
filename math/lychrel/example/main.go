@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gitchander/go-examples/lychrel"
+	"github.com/gitchander/heuristic/math/lychrel"
 )
 
 func numberTest(v uint64) {
