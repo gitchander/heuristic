@@ -1,82 +1,137 @@
 package ternary
 
-// other synonym Trilean
-
-type TriBool int
+type privTriBool int
 
 const (
-	Unknown TriBool = iota
-	True
-	False
+	privUnknown privTriBool = iota // default value
+	privTrue
+	privFalse
 )
 
-//---------------------------------------------------------------------------
-//   Or | F T U
-// -----|------
-//    F | F T U
-//    T | T T T
-//    U | U T U
-//---------------------------------------------------------------------------
+const (
+	strUnknown = "Unknown"
+	strTrue    = "True"
+	strFalse   = "False"
+)
+
+var (
+	key_TriBool = map[privTriBool]string{
+		privUnknown: strUnknown,
+		privTrue:    strTrue,
+		privFalse:   strFalse,
+	}
+
+	val_TriBool = map[string]privTriBool{
+		strUnknown: privUnknown,
+		strTrue:    privTrue,
+		strFalse:   privFalse,
+	}
+)
+
+// other synonym Trilean
+type TriBool struct {
+	v privTriBool // hide operators '==' and '='
+}
+
+func (a *TriBool) SetTrue() *TriBool {
+	a.v = privTrue
+	return a
+}
+
+func (a *TriBool) SetFalse() *TriBool {
+	a.v = privFalse
+	return a
+}
+
+func (a *TriBool) SetUnknown() *TriBool {
+	a.v = privUnknown
+	return a
+}
+
+func (a TriBool) IsTrue() bool {
+	return (a.v == privTrue)
+}
+
+func (a TriBool) IsFalse() bool {
+	return (a.v == privFalse)
+}
+
+func (a TriBool) IsUnknown() bool {
+	return (a.v == privUnknown)
+}
+
+func (a TriBool) Equal(b TriBool) bool {
+
+	return (a.v == b.v)
+}
+
+//---------------
+//   Or | F T U |
+// -----|-------|
+//    F | F T U |
+//    T | T T T |
+//    U | U T U |
+//---------------
 func (a TriBool) Or(b TriBool) (c TriBool) {
 
 	switch {
-	case (a == True) || (b == True):
-		c = True
+	case (a.v == privTrue) || (b.v == privTrue):
+		c.v = privTrue
 
-	case (a == False) && (b == False):
-		c = False
+	case (a.v == privFalse) && (b.v == privFalse):
+		c.v = privFalse
 	}
 
 	return
 }
 
-//---------------------------------------------------------------------------
-//  And | F T U
-// -----|------
-//    F | F F F
-//    T | F T U
-//    U | F U U
-//---------------------------------------------------------------------------
+//---------------
+//  And | F T U |
+// -----|-------|
+//    F | F F F |
+//    T | F T U |
+//    U | F U U |
+//---------------
 func (a TriBool) And(b TriBool) (c TriBool) {
 
 	switch {
-	case (a == False) || (b == False):
-		c = False
+	case (a.v == privFalse) || (b.v == privFalse):
+		c.v = privFalse
 
-	case (a == True) && (b == True):
-		c = True
+	case (a.v == privTrue) && (b.v == privTrue):
+		c.v = privTrue
 	}
 
 	return
 }
 
-//---------------------------------------------------------------------------
-//  Xor | F T U
-// -----|------
-//    F | F T U
-//    T | T F U
-//    U | U U U
-//---------------------------------------------------------------------------
+//---------------
+//  Xor | F T U |
+// -----|-------|
+//    F | F T U |
+//    T | T F U |
+//    U | U U U |
+//---------------
 func (a TriBool) Xor(b TriBool) (c TriBool) {
 
-	switch a {
-	case True:
+	switch a.v {
+	case privTrue:
 		{
-			switch b {
-			case True:
-				c = False
-			case False:
-				c = True
+			switch b.v {
+			case privTrue:
+				c.v = privFalse
+			case privFalse:
+				c.v = privTrue
 			}
 		}
 
-	case False:
+	case privFalse:
 		{
-			switch b {
-			case True:
-				c = True
-			case False:
-				c = False
+			switch b.v {
+			case privTrue:
+				c.v = privTrue
+			case privFalse:
+				c.v = privFalse
 			}
 		}
 	}
@@ -86,28 +141,30 @@ func (a TriBool) Xor(b TriBool) (c TriBool) {
 
 func (a TriBool) Not() (b TriBool) {
 
-	switch a {
-	case False:
-		b = True
-	case True:
-		b = False
+	switch a.v {
+	case privFalse:
+		b.v = privTrue
+	case privTrue:
+		b.v = privFalse
 	}
 
 	return
 }
 
-func (a TriBool) String() (s string) {
+func (a TriBool) String() string {
 
-	switch a {
-	case True:
-		s = "True"
-
-	case False:
-		s = "False"
-
-	default:
-		s = "Unknown"
+	s, ok := key_TriBool[a.v]
+	if !ok {
+		s = strUnknown
 	}
+	return s
+}
 
-	return
+func (a *TriBool) Parse(s string) bool {
+
+	v, ok := val_TriBool[s]
+	if ok {
+		a.v = v
+	}
+	return ok
 }

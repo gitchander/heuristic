@@ -2,115 +2,136 @@ package ternary
 
 import "testing"
 
-const anyOther TriBool = 100 // -> Unknown
+const anyOther privTriBool = 100 // -> Unknown
 
 type unaryOperatorSample struct {
-	a, b TriBool // b= a.operator()
+	a, b privTriBool // b= a.operator()
 }
 
 type binaryOperatorSample struct {
-	a, b, c TriBool // c= a.operator(b)
+	a, b, c privTriBool // c= a.operator(b)
 }
 
 var not_Samples = []unaryOperatorSample{
 
-	{True, False},
-	{False, True},
-	{Unknown, Unknown},
-	{anyOther, Unknown},
+	{privTrue, privFalse},
+	{privFalse, privTrue},
+	{privUnknown, privUnknown},
+	{anyOther, privUnknown},
 }
 
 var and_Samples = []binaryOperatorSample{
 
-	{True, True, True},
-	{False, True, False},
-	{Unknown, True, Unknown},
-	{anyOther, True, Unknown},
+	{privTrue, privTrue, privTrue},
+	{privFalse, privTrue, privFalse},
+	{privUnknown, privTrue, privUnknown},
+	{anyOther, privTrue, privUnknown},
 
-	{True, False, False},
-	{False, False, False},
-	{Unknown, False, False},
-	{anyOther, False, False},
+	{privTrue, privFalse, privFalse},
+	{privFalse, privFalse, privFalse},
+	{privUnknown, privFalse, privFalse},
+	{anyOther, privFalse, privFalse},
 
-	{True, Unknown, Unknown},
-	{False, Unknown, False},
-	{Unknown, Unknown, Unknown},
-	{anyOther, Unknown, Unknown},
+	{privTrue, privUnknown, privUnknown},
+	{privFalse, privUnknown, privFalse},
+	{privUnknown, privUnknown, privUnknown},
+	{anyOther, privUnknown, privUnknown},
 
-	{True, anyOther, Unknown},
-	{False, anyOther, False},
-	{Unknown, anyOther, Unknown},
-	{anyOther, anyOther, Unknown},
+	{privTrue, anyOther, privUnknown},
+	{privFalse, anyOther, privFalse},
+	{privUnknown, anyOther, privUnknown},
+	{anyOther, anyOther, privUnknown},
 }
 
 var or_Samples = []binaryOperatorSample{
 
-	{True, True, True},
-	{False, True, True},
-	{Unknown, True, True},
-	{anyOther, True, True},
+	{privTrue, privTrue, privTrue},
+	{privFalse, privTrue, privTrue},
+	{privUnknown, privTrue, privTrue},
+	{anyOther, privTrue, privTrue},
 
-	{True, False, True},
-	{False, False, False},
-	{Unknown, False, Unknown},
-	{anyOther, False, Unknown},
+	{privTrue, privFalse, privTrue},
+	{privFalse, privFalse, privFalse},
+	{privUnknown, privFalse, privUnknown},
+	{anyOther, privFalse, privUnknown},
 
-	{True, Unknown, True},
-	{False, Unknown, Unknown},
-	{Unknown, Unknown, Unknown},
-	{anyOther, Unknown, Unknown},
+	{privTrue, privUnknown, privTrue},
+	{privFalse, privUnknown, privUnknown},
+	{privUnknown, privUnknown, privUnknown},
+	{anyOther, privUnknown, privUnknown},
 
-	{True, anyOther, True},
-	{False, anyOther, Unknown},
-	{Unknown, anyOther, Unknown},
-	{anyOther, anyOther, Unknown},
+	{privTrue, anyOther, privTrue},
+	{privFalse, anyOther, privUnknown},
+	{privUnknown, anyOther, privUnknown},
+	{anyOther, anyOther, privUnknown},
 }
 
 var xor_Samples = []binaryOperatorSample{
 
-	{True, True, False},
-	{False, True, True},
-	{Unknown, True, Unknown},
-	{anyOther, True, Unknown},
+	{privTrue, privTrue, privFalse},
+	{privFalse, privTrue, privTrue},
+	{privUnknown, privTrue, privUnknown},
+	{anyOther, privTrue, privUnknown},
 
-	{True, False, True},
-	{False, False, False},
-	{Unknown, False, Unknown},
-	{anyOther, False, Unknown},
+	{privTrue, privFalse, privTrue},
+	{privFalse, privFalse, privFalse},
+	{privUnknown, privFalse, privUnknown},
+	{anyOther, privFalse, privUnknown},
 
-	{True, Unknown, Unknown},
-	{False, Unknown, Unknown},
-	{Unknown, Unknown, Unknown},
-	{anyOther, Unknown, Unknown},
+	{privTrue, privUnknown, privUnknown},
+	{privFalse, privUnknown, privUnknown},
+	{privUnknown, privUnknown, privUnknown},
+	{anyOther, privUnknown, privUnknown},
 
-	{True, anyOther, Unknown},
-	{False, anyOther, Unknown},
-	{Unknown, anyOther, Unknown},
-	{anyOther, anyOther, Unknown},
+	{privTrue, anyOther, privUnknown},
+	{privFalse, anyOther, privUnknown},
+	{privUnknown, anyOther, privUnknown},
+	{anyOther, anyOther, privUnknown},
 }
 
 func TestTriBool(t *testing.T) {
 
+	var a, b, c TriBool
+
 	for _, s := range not_Samples {
-		if s.a.Not() != s.b {
+
+		a.v = s.a
+		b.v = s.b
+
+		if !a.Not().Equal(b) {
 			t.Errorf("not %s", s.a)
 		}
 	}
 
 	for _, s := range and_Samples {
-		if s.a.And(s.b) != s.c {
+
+		a.v = s.a
+		b.v = s.b
+		c.v = s.c
+
+		if !a.And(b).Equal(c) {
 			t.Errorf("%s and %s", s.a, s.b)
 		}
 	}
 
 	for _, s := range or_Samples {
-		if s.a.Or(s.b) != s.c {
+
+		a.v = s.a
+		b.v = s.b
+		c.v = s.c
+
+		if !a.Or(b).Equal(c) {
 			t.Errorf("%s or %s", s.a, s.b)
 		}
 	}
 
 	for _, s := range xor_Samples {
-		if s.a.Xor(s.b) != s.c {
+
+		a.v = s.a
+		b.v = s.b
+		c.v = s.c
+
+		if !a.Xor(b).Equal(c) {
 			t.Errorf("%s xor %s", s.a, s.b)
 		}
 	}

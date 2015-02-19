@@ -6,16 +6,40 @@ import (
 	. "github.com/gitchander/heuristic/math/ternary"
 )
 
-func ExampleBoolean() {
+func TriBoolUse() {
+
+	var a TriBool
+
+	if a.IsTrue() {
+		fmt.Println("\t true")
+	} else if a.IsFalse() {
+		fmt.Println("\t false")
+	} else {
+		fmt.Println("\t unknown")
+	}
+
+	if a.IsUnknown() {
+		fmt.Println("\t unknown")
+	} else {
+		fmt.Println("\t not unknown")
+	}
+}
+
+func TriBoolExample() {
 
 	var a, b TriBool
 
-	a = False
-	b = True
+	if a.Parse("True") {
+		fmt.Println(a)
+	}
+
+	a.SetFalse()
+	b.SetTrue()
 
 	c := a.Or(b.Not())
+
 	fmt.Println(c)
-	fmt.Println(b == True)
+	fmt.Println(b == a)
 
 	fmt.Println(a.Xor(b))
 }
@@ -30,11 +54,9 @@ func ExampleTryte() {
 
 	fmt.Println(c)
 	fmt.Println(c.Int())
-
 }
 
 func main() {
 
-	ExampleTryte()
-	//ExampleBoolean()
+	TriBoolUse()
 }
