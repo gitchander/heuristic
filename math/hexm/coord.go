@@ -28,21 +28,17 @@ type privCoord struct {
 	x, y, z int
 }
 
-func NewCoord(x, y, z int) (c Coord, err error) {
+func NewCoord(x, y, z int) (Coord, error) {
 
 	if (x < 0) || (y < 0) || (z < 0) {
-		err = ErrorCoordNegativeParameter
-		return
+		return nil, ErrorCoordNegativeParameter
 	}
 
 	if (x != 0) && (y != 0) && (z != 0) {
-		err = ErrorCoordOneZeroParameter
-		return
+		return nil, ErrorCoordOneZeroParameter
 	}
 
-	c = &privCoord{x, y, z}
-
-	return
+	return &privCoord{x, y, z}, nil
 }
 
 func (this *privCoord) GetCoord() (x, y, z int) {

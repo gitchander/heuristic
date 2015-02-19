@@ -10,17 +10,13 @@ type privSize struct {
 	sizeX, sizeY, sizeZ int
 }
 
-func NewSize(sizeX, sizeY, sizeZ int) (s Size, err error) {
+func NewSize(sizeX, sizeY, sizeZ int) (Size, error) {
 
 	if (sizeX <= 0) || (sizeY <= 0) || (sizeZ <= 0) {
-
-		err = ErrorSizeZeroParameter
-		return
+		return nil, ErrorSizeZeroParameter
 	}
 
-	s = &privSize{sizeX, sizeY, sizeZ}
-
-	return
+	return &privSize{sizeX, sizeY, sizeZ}, nil
 }
 
 func (this *privSize) GetSize() (sizeX, sizeY, sizeZ int) {

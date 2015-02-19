@@ -1,12 +1,11 @@
 package hexm
 
 import (
-	"math"
+	"github.com/gitchander/heuristic/math/graph2d"
 )
 
 const (
-	sqrtThree = 1.73205080757
-	twoPi     = 2 * math.Pi
+	sqrtThree = 1.73205080757 // sqrt(3)
 )
 
 const (
@@ -14,31 +13,9 @@ const (
 	factorY = sqrtThree * 0.5
 )
 
-func floor(x float32) float32 {
-	return float32(math.Floor(float64(x)))
-}
-
-func round(x float32) float32 {
-	return (floor(x) + 0.5)
-}
-
-func HexPolygon() []Vector {
-	return []Vector{
-		Vector{-1.0, 0.0},
-		Vector{-0.5, sqrtThree * 0.5},
-		Vector{0.5, sqrtThree * 0.5},
-		Vector{1.0, 0.0},
-		Vector{0.5, -sqrtThree * 0.5},
-		Vector{-0.5, -sqrtThree * 0.5},
-	}
-}
-
-//--------------------------------------------------------------
 // dividend / divisor= quotient
 // dividend % divisor= remainder
-
 // dividend = quotient * divisor + remainder
-
 func divmod(dividend, divisor int) (quotient, remainder int) {
 
 	quotient = dividend / divisor
@@ -47,27 +24,18 @@ func divmod(dividend, divisor int) (quotient, remainder int) {
 	return
 }
 
-//--------------------------------------------------------------
-func AngleNormalize(angle float32) float32 {
-
-	for angle > twoPi {
-		angle -= twoPi
+func HexPolygon() []graph2d.Vector {
+	return []graph2d.Vector{
+		graph2d.Vector{-1.0, 0.0},
+		graph2d.Vector{-0.5, sqrtThree * 0.5},
+		graph2d.Vector{0.5, sqrtThree * 0.5},
+		graph2d.Vector{1.0, 0.0},
+		graph2d.Vector{0.5, -sqrtThree * 0.5},
+		graph2d.Vector{-0.5, -sqrtThree * 0.5},
 	}
-
-	for angle < 0.0 {
-		angle += twoPi
-	}
-
-	//double norm_angle= fMath::Mod(Angle, Math::TwoPi);
-	//if (norm_angle < 0.0f) norm_angle+= Math::TwoPi;
-
-	// result -> [ 0 ... 2Pi ]
-
-	return angle
 }
 
-//--------------------------------------------------------------
-func CoordToPosition(c Coord) (v Vector) {
+func CoordToVector(c Coord) (v graph2d.Vector) {
 
 	x, y, z := c.GetCoord()
 
@@ -95,7 +63,7 @@ func CoordToPosition(c Coord) (v Vector) {
 	return
 }
 
-func VectorToCoord(v Vector) (Coord, error) {
+func VectorToCoord(v graph2d.Vector) (Coord, error) {
 
 	if v.X < 0.0 {
 		if v.Y < -0.5*v.X/factorY {
@@ -109,18 +77,18 @@ func VectorToCoord(v Vector) (Coord, error) {
 	return vectorToCoordZX(v) // y = 0
 }
 
-func vectorInCell(v Vector, c Coord) bool {
+func vectorInCell(v graph2d.Vector, c Coord) bool {
 
-	pos := CoordToPosition(c)
+	pos := CoordToVector(c)
 	vs := HexPolygon()
 	for i, _ := range vs {
 		vs[i] = vs[i].Add(pos)
 	}
 
-	return VectorInPolygon(v, vs)
+	return graph2d.VectorInPolygon(v, vs)
 }
 
-func vectorToCoordXY(v Vector) (Coord, error) {
+func vectorToCoordXY(v graph2d.Vector) (Coord, error) {
 
 	var (
 		fX = v.X / factorX
@@ -128,8 +96,8 @@ func vectorToCoordXY(v Vector) (Coord, error) {
 	)
 
 	var (
-		x0 = int(floor(fX))
-		y0 = int(floor(fY))
+		x0 = int(graph2d.Floor(fX))
+		y0 = int(graph2d.Floor(fY))
 	)
 
 	for dx := 0; dx < 2; dx++ {
@@ -149,7 +117,7 @@ func vectorToCoordXY(v Vector) (Coord, error) {
 	return nil, ErrorVectorToCoord
 }
 
-func vectorToCoordYZ(v Vector) (Coord, error) {
+func vectorToCoordYZ(v graph2d.Vector) (Coord, error) {
 
 	var (
 		fY = -0.5 * (v.X/factorX + v.Y/factorY)
@@ -157,8 +125,8 @@ func vectorToCoordYZ(v Vector) (Coord, error) {
 	)
 
 	var (
-		y0 = int(floor(fY))
-		z0 = int(floor(fZ))
+		y0 = int(graph2d.Floor(fY))
+		z0 = int(graph2d.Floor(fZ))
 	)
 
 	for dy := 0; dy < 2; dy++ {
@@ -178,7 +146,7 @@ func vectorToCoordYZ(v Vector) (Coord, error) {
 	return nil, ErrorVectorToCoord
 }
 
-func vectorToCoordZX(v Vector) (Coord, error) {
+func vectorToCoordZX(v graph2d.Vector) (Coord, error) {
 
 	var (
 		fZ = 0.5 * (v.Y/factorY - v.X/factorX)
@@ -186,8 +154,8 @@ func vectorToCoordZX(v Vector) (Coord, error) {
 	)
 
 	var (
-		z0 = int(floor(fZ))
-		x0 = int(floor(fX))
+		z0 = int(graph2d.Floor(fZ))
+		x0 = int(graph2d.Floor(fX))
 	)
 
 	for dz := 0; dz < 2; dz++ {
@@ -206,5 +174,3 @@ func vectorToCoordZX(v Vector) (Coord, error) {
 
 	return nil, ErrorVectorToCoord
 }
-
-//--------------------------------------------------------------

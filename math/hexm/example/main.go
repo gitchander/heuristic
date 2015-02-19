@@ -45,7 +45,7 @@ func ExampleIterator() error {
 
 	m := hexm.NewMatrix(s)
 
-	r := NewRandomize()
+	r := newRand()
 	for I := m.NewIterator(); !I.Done(); I.Next() {
 
 		I.SetCurrent(r.Intn(1000))
@@ -80,6 +80,6 @@ func ExampleIterator() error {
 	return nil
 }
 
-func NewRandomize() *rand.Rand {
+func newRand() *rand.Rand {
 	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }
