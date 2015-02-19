@@ -9,23 +9,28 @@ const (
 	twoPi     = 2 * math.Pi
 )
 
-type Point struct {
-	X, Y float32
+const (
+	factorX = 1.5
+	factorY = sqrtThree * 0.5
+)
+
+func floor(x float32) float32 {
+	return float32(math.Floor(float64(x)))
 }
 
-func PointInPolygon(m Point, poly []Point) bool {
+func round(x float32) float32 {
+	return (floor(x) + 0.5)
+}
 
-	ok := false
-	if n := len(poly); n > 0 {
-		b := poly[n-1]
-		for _, a := range poly {
-			if ((a.X <= m.X) && (b.X > m.X) || (b.X <= m.X) && (a.X > m.X)) && (m.Y < (m.X-a.X)*(b.Y-a.Y)/(b.X-a.X)+a.Y) {
-				ok = !ok
-			}
-			b = a
-		}
+func HexPolygon() []Vector {
+	return []Vector{
+		Vector{-1.0, 0.0},
+		Vector{-0.5, sqrtThree * 0.5},
+		Vector{0.5, sqrtThree * 0.5},
+		Vector{1.0, 0.0},
+		Vector{0.5, -sqrtThree * 0.5},
+		Vector{-0.5, -sqrtThree * 0.5},
 	}
-	return ok
 }
 
 //--------------------------------------------------------------
@@ -62,12 +67,7 @@ func AngleNormalize(angle float32) float32 {
 }
 
 //--------------------------------------------------------------
-func CoordToPosition(c Coord) (p Point) {
-
-	const (
-		dX = 1.5
-		dY = sqrtThree * 0.5
-	)
+func CoordToPosition(c Coord) (v Vector) {
 
 	x, y, z := c.GetCoord()
 
@@ -75,38 +75,136 @@ func CoordToPosition(c Coord) (p Point) {
 
 	case (x == 0):
 		{
-			p.X = -dX * float32(z)
-			p.Y = dY * float32(z-2*y)
+			v.X = -factorX * float32(z)
+			v.Y = factorY * float32(z-2*y)
 		}
 
 	case (y == 0):
 		{
-			p.X = dX * float32(x-z)
-			p.Y = dY * float32(z+x)
+			v.X = factorX * float32(x-z)
+			v.Y = factorY * float32(z+x)
 		}
 
 	case (z == 0):
 		{
-			p.X = dX * float32(x)
-			p.Y = dY * float32(x-2*y)
+			v.X = factorX * float32(x)
+			v.Y = factorY * float32(x-2*y)
 		}
 	}
 
 	return
 }
 
-func HexagonVertexes() []Point {
+func VectorToCoord(v Vector) (Coord, error) {
 
-	p := make([]Point, 6)
+	if v.X < 0.0 {
+		if v.Y < -0.5*v.X/factorY {
+			return vectorToCoordYZ(v) // x = 0
+		}
+	} else {
+		if v.Y < 0.5*v.X/factorY {
+			return vectorToCoordXY(v) // z = 0
+		}
+	}
+	return vectorToCoordZX(v) // y = 0
+}
 
-	p[0] = Point{-1.0, 0.0}
-	p[1] = Point{-0.5, sqrtThree * 0.5}
-	p[2] = Point{0.5, sqrtThree * 0.5}
-	p[3] = Point{1.0, 0.0}
-	p[4] = Point{0.5, -sqrtThree * 0.5}
-	p[5] = Point{-0.5, -sqrtThree * 0.5}
+func vectorInCell(v Vector, c Coord) bool {
 
-	return p
+	pos := CoordToPosition(c)
+	vs := HexPolygon()
+	for i, _ := range vs {
+		vs[i] = vs[i].Add(pos)
+	}
+
+	return VectorInPolygon(v, vs)
+}
+
+func vectorToCoordXY(v Vector) (Coord, error) {
+
+	var (
+		fX = v.X / factorX
+		fY = 0.5 * (v.X/factorX - v.Y/factorY)
+	)
+
+	var (
+		x0 = int(floor(fX))
+		y0 = int(floor(fY))
+	)
+
+	for dx := 0; dx < 2; dx++ {
+		for dy := 0; dy < 2; dy++ {
+
+			c, err := NewCoord(x0+dx, y0+dy, 0)
+			if err != nil {
+				return nil, err
+			}
+
+			if vectorInCell(v, c) {
+				return c, nil
+			}
+		}
+	}
+
+	return nil, ErrorVectorToCoord
+}
+
+func vectorToCoordYZ(v Vector) (Coord, error) {
+
+	var (
+		fY = -0.5 * (v.X/factorX + v.Y/factorY)
+		fZ = -v.X / factorX
+	)
+
+	var (
+		y0 = int(floor(fY))
+		z0 = int(floor(fZ))
+	)
+
+	for dy := 0; dy < 2; dy++ {
+		for dz := 0; dz < 2; dz++ {
+
+			c, err := NewCoord(0, y0+dy, z0+dz)
+			if err != nil {
+				return nil, err
+			}
+
+			if vectorInCell(v, c) {
+				return c, nil
+			}
+		}
+	}
+
+	return nil, ErrorVectorToCoord
+}
+
+func vectorToCoordZX(v Vector) (Coord, error) {
+
+	var (
+		fZ = 0.5 * (v.Y/factorY - v.X/factorX)
+		fX = 0.5 * (v.X/factorX + v.Y/factorY)
+	)
+
+	var (
+		z0 = int(floor(fZ))
+		x0 = int(floor(fX))
+	)
+
+	for dz := 0; dz < 2; dz++ {
+		for dx := 0; dx < 2; dx++ {
+
+			c, err := NewCoord(x0+dx, 0, z0+dz)
+			if err != nil {
+				return nil, err
+			}
+
+			if vectorInCell(v, c) {
+				return c, nil
+			}
+		}
+	}
+
+	return nil, ErrorVectorToCoord
 }
 
 //--------------------------------------------------------------

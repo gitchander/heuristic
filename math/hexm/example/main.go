@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/gitchander/heuristic/math/hexm"
 	"math/rand"
 	"time"
+
+	"github.com/gitchander/heuristic/math/hexm"
 )
 
 func main() {

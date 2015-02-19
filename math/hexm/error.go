@@ -21,4 +21,5 @@ var (
 	ErrorSizeZeroParameter      = newError("Parameters can not be negative or zero")
 	ErrorIndexIsNotValit        = newError("Index is not valid")
 	ErrorIteratorIndexOut       = newError("Iterator index out")
+	ErrorVectorToCoord          = newError("Vector to coord")
 )

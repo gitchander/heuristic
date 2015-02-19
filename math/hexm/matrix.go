@@ -25,6 +25,8 @@ coord= (x, y, z)
 
 				(2,0,2)
 
+//-----------------------
+
 */
 
 type Matrix interface {

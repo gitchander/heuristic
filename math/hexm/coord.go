@@ -18,6 +18,10 @@ type Coord interface {
 	IsNeighbor(other Coord) bool // return true if other is neighbor off this
 	Equal(other Coord) bool      // return true if other equal this
 	IsZero() bool
+
+	NeighborX(NeighborDir) (Coord, error)
+	NeighborY(NeighborDir) (Coord, error)
+	NeighborZ(NeighborDir) (Coord, error)
 }
 
 type privCoord struct {
