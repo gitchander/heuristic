@@ -4,14 +4,21 @@ import "fmt"
 
 type vect3 [3]float32
 
-func (v *vect3) normalize() {
+func (v *vect3) normalize() error {
 
 	if m := v[2]; !Equal(m, 1) {
+
+		if Equal(m, 0) {
+			return ErrorDivByZero
+		}
+
 		inv_m := 1 / m
 		v[0] *= inv_m
 		v[1] *= inv_m
 		v[2] = 1
 	}
+
+	return nil
 }
 
 type Vector struct {
@@ -72,7 +79,7 @@ func (v Vector) Distance(w Vector) float32 {
 	return Sqrt(x*x + y*y)
 }
 
-func (v Vector) Transform(m Matrix) (w Vector) {
+func (v *Vector) Transform(m Matrix) (w Vector) {
 
 	var _v, _w vect3
 	_v = v.toVector3()

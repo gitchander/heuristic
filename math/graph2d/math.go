@@ -1,6 +1,9 @@
 package graph2d
 
-import "math"
+import (
+	"errors"
+	"math"
+)
 
 const (
 	Epsilon = 1e-6 // for equal
@@ -8,6 +11,8 @@ const (
 	Pi    = float32(math.Pi)
 	twoPi = 2 * Pi
 )
+
+var ErrorDivByZero = errors.New("DivByZero")
 
 func Floor(x float32) float32 {
 	return float32(math.Floor(float64(x)))
