@@ -2,7 +2,12 @@ package graph2d
 
 import "math"
 
-const twoPi = 2 * math.Pi
+const (
+	Epsilon = 1e-6 // for equal
+
+	Pi    = float32(math.Pi)
+	twoPi = 2 * Pi
+)
 
 func Floor(x float32) float32 {
 	return float32(math.Floor(float64(x)))
@@ -10,6 +15,18 @@ func Floor(x float32) float32 {
 
 func Round(x float32) float32 {
 	return (Floor(x) + 0.5)
+}
+
+func Sqrt(x float32) float32 {
+	return float32(math.Sqrt(float64(x)))
+}
+
+func Abs(x float32) float32 {
+	return float32(math.Abs(float64(x)))
+}
+
+func Equal(x, y float32) bool {
+	return (Abs(x-y) < Epsilon)
 }
 
 func SinCos(angle float32) (sin, cos float32) {
