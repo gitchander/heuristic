@@ -2,19 +2,19 @@ package main
 
 import (
 	"fmt"
-	. "github.com/gitchander/heuristic/math/graph2d"
+	"github.com/gitchander/heuristic/math/graph2d"
 )
 
 func main() {
 
-	v := Vector{3, 5}
+	v := graph2d.Vector{1, 0}
 
-	t := Identity()
-	t.Rotate(Pi / 4)
+	t := graph2d.NewTransform()
+	t.Rotate(graph2d.Pi / 4)
 	t.Scale(2, 2)
 	t.Move(5, 3)
 
-	w := v.Transform(t)
+	w := t.Apply(v)
 
 	fmt.Println(w)
 }

@@ -2,39 +2,8 @@ package graph2d
 
 import "fmt"
 
-type vect3 [3]float32
-
-func (v *vect3) normalize() error {
-
-	if m := v[2]; !Equal(m, 1) {
-
-		if Equal(m, 0) {
-			return ErrorDivByZero
-		}
-
-		inv_m := 1 / m
-		v[0] *= inv_m
-		v[1] *= inv_m
-		v[2] = 1
-	}
-
-	return nil
-}
-
 type Vector struct {
 	X, Y float32
-}
-
-func (v Vector) toVector3() vect3 {
-	return vect3{v.X, v.Y, 1}
-}
-
-func (v *Vector) fromVector3(w vect3) {
-
-	w.normalize()
-
-	v.X = w[0]
-	v.Y = w[1]
 }
 
 func (v Vector) String() string {
@@ -77,16 +46,6 @@ func (v Vector) Distance(w Vector) float32 {
 	x := v.X - w.X
 	y := v.Y - w.Y
 	return Sqrt(x*x + y*y)
-}
-
-func (v *Vector) Transform(m Matrix) (w Vector) {
-
-	var _v, _w vect3
-	_v = v.toVector3()
-	vector_mul_matrix(_v[:], m[:], _w[:])
-	w.fromVector3(_w)
-
-	return
 }
 
 func VectorInPolygon(v Vector, poly []Vector) bool {
