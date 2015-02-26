@@ -26,7 +26,7 @@ type PuzzleConfig struct {
 func intsToPoint(ds []int) (p Point, err error) {
 
 	if len(ds) != 2 {
-		err = newError("cellToPoint")
+		err = newError("intsToPoint")
 		return
 	}
 
@@ -35,12 +35,12 @@ func intsToPoint(ds []int) (p Point, err error) {
 	return
 }
 
-func stringToRune(s string) (rune, error) {
+func stringToRune(s string) rune {
 
 	r, runeSize := utf8.DecodeRuneInString(s)
 	if runeSize != len(s) {
-		return r, newError("Id UnmarshalJSON")
+		return utf8.RuneError
 	}
 
-	return r, nil
+	return r
 }

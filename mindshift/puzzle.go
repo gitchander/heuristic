@@ -1,80 +1,109 @@
 package mindshift
 
-import (
-	"unicode/utf8"
-)
+type IPuzzle interface {
+	MoveUp() bool
+	MoveDown() bool
+	MoveLeft() bool
+	MoveRight() bool
+
+	Select(Point) bool
+	IsSolved() bool
+	Reset()
+}
 
 type Puzzle struct {
 	indexActive int
-	primitives  []Primitive
+	units       []Unit
 }
 
 func NewPuzzle(config PuzzleConfig) (*Puzzle, error) {
 
-	ps, err := makePrimitives(config)
+	units, err := makeUnits(config)
 	if err != nil {
+		return nil, err
+	}
+
+	if err = checkDuplicatePoints(units); err != nil {
+		return nil, err
+	}
+
+	if err = checkLocations(units); err != nil {
 		return nil, err
 	}
 
 	return &Puzzle{
 		indexActive: 0,
-		primitives:  ps,
+		units:       units,
 	}, nil
 }
 
-func makePrimitives(config PuzzleConfig) ([]Primitive, error) {
+func (this *Puzzle) MoveUp() bool {
+	return this.moveActiveUnit(Point{X: 0, Y: -1})
+}
 
-	pm := make(map[rune]*Primitive)
+func (this *Puzzle) MoveDown() bool {
+	return this.moveActiveUnit(Point{X: 0, Y: +1})
+}
 
-	var identifiers = config.Primitives.Identifiers
-	for _, identifier := range identifiers {
+func (this *Puzzle) MoveLeft() bool {
+	return this.moveActiveUnit(Point{X: -1, Y: 0})
+}
 
-		r, err := stringToRune(identifier.Id)
-		if err != nil {
-			return nil, err
-		}
+func (this *Puzzle) MoveRight() bool {
+	return this.moveActiveUnit(Point{X: +1, Y: 0})
+}
 
-		start, err := intsToPoint(identifier.Location.Start)
-		if err != nil {
-			return nil, err
-		}
+func (this *Puzzle) moveActiveUnit(shift Point) bool {
 
-		finish, err := intsToPoint(identifier.Location.Finish)
-		if err != nil {
-			return nil, err
-		}
+	index := this.indexActive
 
-		pm[r] = &Primitive{
-			Location: Location{
-				Start:   start,
-				Finish:  finish,
-				Current: start,
-			},
-			Points: make([]Point, 0),
-		}
+	if (0 > index) || (index >= len(this.units)) {
+		return false
 	}
 
-	var cs = config.Primitives.Cells
-	for y, s := range cs {
+	if collisionShiftUnit(this.units, index, shift) {
+		return false
+	}
 
-		runeIndex := 0
-		for x := 0; true; x++ {
-			r, runeSize := utf8.DecodeRuneInString(s[runeIndex:])
-			if runeSize == 0 {
-				break
+	unit := &(this.units[index])
+	unit.Location.Current = unit.Location.Current.Add(shift)
+
+	return true
+}
+
+func (this *Puzzle) Select(p Point) bool {
+
+	if i := this.unitIndexByPoint(p); i != -1 {
+		this.indexActive = i
+		return true
+	}
+	return false
+}
+
+func (this *Puzzle) unitIndexByPoint(q Point) int {
+
+	for i, unit := range this.units {
+
+		ps := unit.Points
+		curr := unit.Location.Current
+
+		for _, p := range ps {
+			if q.Equal(p.Add(curr)) {
+				return i
 			}
-			runeIndex += runeSize
-
-			if p, ok := pm[r]; ok {
-				p.Points = append(p.Points, Point{x, y})
-			}
 		}
 	}
 
-	var ps []Primitive
-	for _, p := range pm {
-		ps = append(ps, *p)
-	}
+	return -1
+}
 
-	return ps, nil
+func (this *Puzzle) IsSolved() bool {
+	return checkSolved(this.units)
+}
+
+func (this *Puzzle) Reset() {
+	for i := 0; i < len(this.units); i++ {
+		unit := &(this.units[i])
+		unit.Location.Current = unit.Location.Start
+	}
 }

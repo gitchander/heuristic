@@ -35,27 +35,30 @@ func StringTest() {
 
 func Test() {
 
-	str := `{
-		"Name": "Puzzle 1",
-		"Author": "Chander",
-		"Description": "Description Puzzle",
-		"Difficulty": 1,
-		"Primitives": {
-			"Cells": [
-				"223",
-				"111",
-				"332"
-			],
-			"Identifiers": [
-				{ "Id": "1", "Location": { "Start": [0, 4], "Finish": [0, 0] } },
-				{ "Id": "2", "Location": { "Start": [4, -2], "Finish": [0, 0] } },
-				{ "Id": "3", "Location": { "Start": [-4, -2], "Finish": [0, 0] } }
-			]
-		}
-	}`
-
 	/*
+
 		str := `{
+			"Name": "Puzzle 1",
+			"Author": "Chander",
+			"Description": "Description Puzzle",
+			"Difficulty": 1,
+			"Primitives": {
+				"Cells": [
+					"223",
+					"111",
+					"332"
+				],
+				"Identifiers": [
+					{ "Id": "1", "Location": { "Start": [0, 4], "Finish": [0, 0] } },
+					{ "Id": "2", "Location": { "Start": [4, -2], "Finish": [0, 0] } },
+					{ "Id": "3", "Location": { "Start": [-4, -2], "Finish": [0, 0] } }
+				]
+			}
+		}`
+
+	*/
+
+	str := `{
 			"Name": "Cross 2",
 			"Author": "Chander",
 			"Description": "",
@@ -84,7 +87,6 @@ func Test() {
 				]
 			}
 		}`
-	*/
 
 	var pc mindshift.PuzzleConfig
 
@@ -94,16 +96,6 @@ func Test() {
 		return
 	}
 
-	/*
-		bs, err := json.MarshalIndent(&pc, "", "\t")
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-
-		fmt.Println(string(bs))
-	*/
-
 	puzzle, err := mindshift.NewPuzzle(pc)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -111,10 +103,10 @@ func Test() {
 	}
 
 	fmt.Printf("%+v\n", puzzle)
+
 }
 
 func main() {
 
-	//StringTest()
 	Test()
 }
