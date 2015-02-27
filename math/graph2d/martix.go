@@ -80,13 +80,17 @@ func (m *matrix) Scale(x, y float32) {
 	m[7] *= y
 }
 
-func (m *matrix) move(x, y float32) {
+/*
+
+func (m *matrix) Move(x, y float32) {
 	m.mul(newMatrixMove(x, y))
 }
 
-func (m *matrix) scale(x, y float32) {
+func (m *matrix) Scale(x, y float32) {
 	m.mul(newMatrixScale(x, y))
 }
+
+*/
 
 func (m *matrix) Rotate(angle float32) {
 	m.mul(newMatrixRotate(angle))
