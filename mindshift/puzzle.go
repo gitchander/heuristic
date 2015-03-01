@@ -1,5 +1,9 @@
 package mindshift
 
+import (
+	"github.com/gitchander/heuristic/math/hashxy"
+)
+
 type IPuzzle interface {
 	MoveUp() bool
 	MoveDown() bool
@@ -14,6 +18,7 @@ type IPuzzle interface {
 type Puzzle struct {
 	indexActive int
 	units       []Unit
+	hm           hashxy.Matrix
 }
 
 func NewPuzzle(config PuzzleConfig) (*Puzzle, error) {
@@ -30,6 +35,9 @@ func NewPuzzle(config PuzzleConfig) (*Puzzle, error) {
 	if err = checkLocations(units); err != nil {
 		return nil, err
 	}
+
+	hm := hashxy.NewMatrix(13, 11)
+	hm.
 
 	return &Puzzle{
 		indexActive: 0,
