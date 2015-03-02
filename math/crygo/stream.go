@@ -11,202 +11,82 @@ const (
 )
 
 type streamCipher struct {
-	index int
-	s     []uint32
-	t     []uint32
-	x     []uint32
-	r     replacer
+	b        cipher.Block
+	s        []uint32
+	out      []byte
+	outIndex int
 }
 
-func NewStream(key []byte, syn []byte) (cipher.Stream, error) {
+func NewStream(block cipher.Block, syn []byte) (cipher.Stream, error) {
+
+	size := block.BlockSize()
+
+	if len(syn) != size {
+		return nil, errors.New("wrong syn len")
+	}
+
+	synEnc := make([]byte, size)
+	block.Encrypt(synEnc, syn)
 
 	stream := &streamCipher{
-		index: 0,
-		t:     make([]uint32, 2),
-	}
-	var err error
-
-	if stream.s, err = newSyn(syn); err != nil {
-		return nil, err
-	}
-
-	if stream.r, err = newReplacer256x4(Table1); err != nil {
-		return nil, err
+		b: block,
+		s: []uint32{
+			byteOrder.Uint32(synEnc[0:4]),
+			byteOrder.Uint32(synEnc[4:8]),
+		},
+		out:      make([]byte, size),
+		outIndex: 0,
 	}
 
-	if stream.x, err = newKey(key); err != nil {
-		return nil, err
-	}
-
-	encrypt(stream.x, stream.r, stream.s)
+	stream.refill()
 
 	return stream, nil
 }
 
-func newSyn(syn []byte) ([]uint32, error) {
-
-	if len(syn) != 8 {
-		return nil, errors.New("wrong syn len")
-	}
-
-	s := make([]uint32, 2)
-
-	s[0] = byteOrder.Uint32(syn[0:4])
-	s[1] = byteOrder.Uint32(syn[4:8])
-
-	return s, nil
-}
-
-func (this *streamCipher) nextGamma() {
+func (this *streamCipher) refill() {
 
 	s := this.s
 
 	s[0] = s[0] + C0
 	s[1] = sum_mod32m1(s[1], C1)
 
-	encrypt(this.x, this.r, s)
-	//this.index = 0
+	byteOrder.PutUint32(this.out[0:4], s[0])
+	byteOrder.PutUint32(this.out[4:8], s[1])
+
+	this.b.Encrypt(this.out, this.out)
+
+	this.outIndex = 0
 }
 
 func (this *streamCipher) XORKeyStream(dst, src []byte) {
 
-	i := 0
-
-	for (this.index < 8) && (i < len(src)) {
-
-		dst[i] = src[i] ^ this.t[this.index]
-
-		i++
-		this.index++
+	for len(src) > 0 {
+		if this.outIndex >= len(this.out) {
+			this.refill()
+		}
+		n := safeXORBytes(dst, src, this.out[this.outIndex:])
+		src = src[n:]
+		dst = dst[n:]
+		this.outIndex += n
 	}
+}
 
-	//BCL::UInt32 *U= (BCL::UInt32 *)(Buffer + i);
+func safeXORBytes(dst, a, b []byte) int {
 
-	for i+8 <= len(src) {
-
-		this.nextGamma(K, S, T)
-
-		U[0] ^= T[0]
-		U[1] ^= T[1]
-
-		U += 2
-		i += 8
+	n := len(a)
+	if len(b) < n {
+		n = len(b)
 	}
-
-	/*
-	   if (i < Length)
-	   {
-	           next_gamma(K, S, T);
-	           iT= 0;
-	   }
-
-	   while ((iT < 8) && (i < Length))
-	   {
-	           Buffer[i] ^= pT[iT];
-
-	           i++;
-	           iT++;
-	   }
-	*/
-
+	for i := 0; i < n; i++ {
+		dst[i] = a[i] ^ b[i]
+	}
+	return n
 }
 
 /*
-
-
-    Гаммирование
-
-Синхропосылка преобразуется в цикле 32-З, в итоге получаем
-
-    [8F][10][73][84][19][18][5C][2C].
-
-Этот блок делится на две части по 4 байта:
-
-    [8F][10][73][84] и [19][18][5C][2C].
-
-Первая часть преобразуется по формуле (Значение + 101010416) ОСТАТОК 232
-(то есть складывается со значением 101010416 по модулю 232),
-вторая часть — по формуле (Значение + 101010116 - 1) ОСТАТОК (232 - 1) + 1,
-где «Значение» — значение части, «ОСТАТОК» - операция взятия остатка от деления.
-В результате получаем
-
-    [90][11][74][85] и [1D][19][5D][2D].
-
-Эти значения объединяются обратно в 8-байтовый блок
-
-    [90][11][74][85][1D][19][5D][2D],
-
-результат преобразования которого в цикле 32-З
-
-    [8F][12][BA][93][4A][BB][A4][20]
-
-поразрядно складывается по модулю 2 с блоком входных данных
-
-    [21][04][3B][04][30][04][32][04],
-
-в результате чего имеем блок зашифрованного текста
-
-    [AE][16][81][97][7A][BF][96][24].
-
-Далее 8-байтовый блок, значение которого только что посылалось в цикл 32-З, делится на две части, которые преобразуются также, как недавно части зашифрованной синхропосылки, в результате получаем
-
-    [91][12][75][86] и [21][1A][5E][2E].
-
-Они объединяются в блок
-
-    [91][12][75][86][21][1A][5E][2E],
-
-значение которого передаётся в цикл 32-З, результатом которого становится
-
-    [B2][90][DC][04][87][DE][18][DC].
-
-Очередной входной блок
-
-    [30][04][20][00][20][04][3E][04]
-
-также складывается поразрядно по модулю 2 с результатом выполнения цикла 32-З, в итоге имеем следующий блок зашифрованного текста:
-
-    [82][94][FC][04][A7][DA][26][D8].
-
-Дальше операция повторяется. Берётся 8-байтовое значение, части которого преобразуются по указанным выше формулам, в итоге преобразования имеем новое значение этого блока
-
-    [92][13][76][87][25][1B][5F][2F],
-
-которое поступает в цикл 32-З, результатом которого получаем
-
-    [25][F2][4E][84][51][CA][39][1E].
-
-Складываем его поразрядно по модулю 2 с входным текстом
-
-    [41][04][41][04][38][04][38][04],
-
-в итоге имеем зашифрованный блок
-
-    [64][F6][0F][80][69][CE][01][1A].
-
-Снова операции повторяются, после преобразования вышеупомянутого блока по формулам имеем
-
-    [93][14][77][88][29][1C][60][30],
-
-это значение зашифровывается в 32-З:
-
-    [BA][CF][6A][3E][23][BF][B4][72].
-
-Очередной входной блок, однако, не является полным, его длина составляет 2 байта:
-
-    [21][00].
-
-В таком случае от результата цикла 32-З берётся часть, равная длине блока, в нашем случае — 2:
-
-    [BA][CF];
-
-и также складывается поразрядно по модулю 2 с входным блоком. В результате получаем последний блок зашифрованного текста:
-
-    [9B][CF].
-
-В итоге имеем
-
-    [AE][16][81][97][7A][BF][96][24][82][94][FC][04][A7][DA][26][D8][64][F6][0F][80][69][CE][01][1A][9B][CF].
-
-Расшифрование в этом режиме производится точно также, как и зашифрование, то есть функция зашифрования является одновременно и функцией расшифрования.
+func duplicate(a []byte) []byte {
+	b := make([]byte, len(a))
+	copy(b, a)
+	return b
+}
 */

@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+// http://www.kzi-manual.ru/standarts/?id=2
+
 const (
 	BlockSize = 8
 	KeySize   = 32

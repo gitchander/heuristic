@@ -24,12 +24,9 @@ func TestSumMod32(t *testing.T) {
 func TestSumMod32M1(t *testing.T) {
 
 	var compare = func(a, b uint32) {
-		m, err := sumMod32M1Test(a, b)
+		err := sumMod32M1Test(a, b)
 		if err != nil {
 			t.Error(err)
-		}
-		if len(m) > 0 {
-			t.Log(m)
 		}
 	}
 

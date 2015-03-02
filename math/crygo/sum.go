@@ -26,9 +26,9 @@ func sum_mod32_v1(a, b uint32) uint32 {
 
 func sum_mod32_v2(a, b uint32) uint32 {
 
-	da := maxUint32 - a
-	if b > da {
-		return (b - da - 1)
+	_a := maxUint32 - a
+	if b > _a {
+		return (b - _a - 1)
 	}
 	return (a + b)
 }
@@ -62,18 +62,27 @@ func sumMod32Test(a, b uint32) error {
 }
 
 // (a + b) mod (2^32 - 1)*
-
-// Chander made func (not equal sample if (a = b = 0) )
 func sum_mod32m1(a, b uint32) uint32 {
 
-	da := maxUint32 - a
-	if b > da {
-		return (b - da)
+	_a := maxUint32 - a
+	if b > _a {
+		return (b - _a)
 	}
 	return (a + b)
 }
 
 func sum_mod32m1_sample(a, b uint32) uint32 {
+
+	s := int64(a) + int64(b)
+	if s < (1 << 32) {
+		return uint32(s)
+	}
+
+	return uint32(s - (1 << 32) + 1)
+}
+
+/*
+func sum_mod32m1_v3(a, b uint32) uint32 {
 
 	A := int64(a)
 	B := int64(b)
@@ -81,19 +90,16 @@ func sum_mod32m1_sample(a, b uint32) uint32 {
 
 	return uint32(mod(A+B-1, C) + 1)
 }
+*/
 
-func sumMod32M1Test(a, b uint32) (message string, err error) {
+func sumMod32M1Test(a, b uint32) error {
 
 	s1 := sum_mod32m1(a, b)
 	s2 := sum_mod32m1_sample(a, b)
 
 	if s1 != s2 {
-		if (a == 0) && (b == 0) {
-			message = "special case: (a = 0) and (b = 0)"
-		} else {
-			err = errors.New(fmt.Sprintf("wrong (%d + %d) mod (2^32 - 1)*", a, b))
-		}
+		return errors.New(fmt.Sprintf("wrong (%d + %d) mod (2^32 - 1)*", a, b))
 	}
 
-	return
+	return nil
 }
