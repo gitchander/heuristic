@@ -1,0 +1,41 @@
+package main
+
+import (
+	"fmt"
+	"util/crygo"
+)
+
+func main() {
+
+	a := uint32(MAX_UINT32 - 1)
+	b := uint32(1)
+
+	fmt.Println(sum_mod_32(a, b))
+	fmt.Println(a + b)
+}
+
+func BlockTest() {
+	key := []byte{
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27,
+		0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+	}
+	fmt.Printf("key: [ % x ]\n", key)
+
+	c, err := crygo.NewBlock(key)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	b1 := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
+	b2 := make([]byte, crygo.BlockSize)
+	b3 := make([]byte, crygo.BlockSize)
+
+	c.Encrypt(b2, b1)
+	fmt.Printf("[ % x ]\n", b2)
+
+	c.Decrypt(b3, b2)
+	fmt.Printf("[ % x ]\n", b3)
+}
