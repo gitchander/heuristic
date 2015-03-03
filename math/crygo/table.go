@@ -1,53 +1,79 @@
 package crygo
 
-import (
-	"errors"
-)
-
-type replacer interface {
-	replace(s0 uint32) (s1 uint32)
+type Table interface {
+	Replace(s0 uint32) (s1 uint32)
 }
 
-type replacer16x8 [16 * 8]byte
+func NewTable(bs []byte) (Table, error) {
 
-func newReplacer16x8(table []byte) (replacer, error) {
-
-	if err := TableError(table); err != nil {
+	if err := tableError(bs); err != nil {
 		return nil, err
 	}
 
-	r := new(replacer16x8)
-	copy(r[:], table)
-
-	return r, nil
+	return newReplaceTable4(bs), nil
+	//return newReplaceTable8(bs), nil
 }
 
-func (this *replacer16x8) replace(s0 uint32) (s1 uint32) {
-	return replace8(this[:], s0)
+type replaceTable8 [8 * 16]byte
+
+func newReplaceTable8(bs []byte) Table {
+
+	t := new(replaceTable8)
+	copy(t[:], bs)
+
+	return t
 }
 
-type replacer256x4 [256 * 4]byte
+func (t *replaceTable8) Replace(s0 uint32) (s1 uint32) {
 
-func newReplacer256x4(table []byte) (replacer, error) {
+	s1 |= uint32(t[((s0>>0x00)&0x0F)+0x00]) << 0x00
+	s1 |= uint32(t[((s0>>0x04)&0x0F)+0x10]) << 0x04
+	s1 |= uint32(t[((s0>>0x08)&0x0F)+0x20]) << 0x08
+	s1 |= uint32(t[((s0>>0x0C)&0x0F)+0x30]) << 0x0C
+	s1 |= uint32(t[((s0>>0x10)&0x0F)+0x40]) << 0x10
+	s1 |= uint32(t[((s0>>0x14)&0x0F)+0x50]) << 0x14
+	s1 |= uint32(t[((s0>>0x18)&0x0F)+0x60]) << 0x18
+	s1 |= uint32(t[((s0>>0x1C)&0x0F)+0x70]) << 0x1C
 
-	if err := TableError(table); err != nil {
-		return nil, err
+	return
+}
+
+type replaceTable4 [4 * 256]byte
+
+func newReplaceTable4(bs []byte) Table {
+
+	t := new(replaceTable4)
+
+	// x * 256 = x << 8
+	// x * 32 = x << 5
+	// x * 16 = x << 4
+	// x * 2^n = x << n
+
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 16; j++ {
+			for k := 0; k < 16; k++ {
+				t[(i<<8)+(j<<4)+k] = bs[(i<<5)+k] | (bs[(i<<5)+16+j] << 4)
+			}
+		}
 	}
 
-	t := new(replacer256x4)
-	replace8_to_replace4(table, t[:])
-
-	return t, nil
+	return t
 }
 
-func (this *replacer256x4) replace(s0 uint32) (s1 uint32) {
-	return replace4(this[:], s0)
+func (t *replaceTable4) Replace(s0 uint32) (s1 uint32) {
+
+	s1 |= uint32(t[((s0>>0x00)&0xFF)+0x0000]) << 0x00
+	s1 |= uint32(t[((s0>>0x08)&0xFF)+0x0100]) << 0x08
+	s1 |= uint32(t[((s0>>0x10)&0xFF)+0x0200]) << 0x10
+	s1 |= uint32(t[((s0>>0x18)&0xFF)+0x0300]) << 0x18
+
+	return
 }
 
-func TableError(table []byte) error {
+func tableError(bs []byte) error {
 
-	if len(table) != 16*8 {
-		return errors.New("wrong table len")
+	if len(bs) != 16*8 {
+		return newError("wrong table len")
 	}
 
 	var x [16]int
@@ -60,30 +86,27 @@ func TableError(table []byte) error {
 		}
 
 		for j := 0; j < 16; j++ {
-			b := table[j]
+			b := bs[j]
 			if (b >= 0) && (b < 16) {
 				x[b]++
 			} else {
-				return errors.New("table: invalid value")
+				return newError("table: invalid value")
 			}
 		}
 
 		for j, _ := range x {
 			if x[j] != 1 {
-				return errors.New("table wrong")
+				return newError("table wrong")
 			}
 		}
 
-		table = table[16:]
+		bs = bs[16:]
 	}
 
 	return nil
 }
 
-//----------------------------------------------
-// Идентификатор: id-GostR3411-94-TestParamSet
-
-var Table1 = []byte{
+var table1 = []byte{
 	0x4, 0xA, 0x9, 0x2, 0xD, 0x8, 0x0, 0xE, 0x6, 0xB, 0x1, 0xC, 0x7, 0xF, 0x5, 0x3,
 	0xE, 0xB, 0x4, 0xC, 0x6, 0xD, 0xF, 0xA, 0x2, 0x3, 0x8, 0x1, 0x0, 0x7, 0x5, 0x9,
 	0x5, 0x8, 0x1, 0xD, 0xA, 0x3, 0x4, 0x2, 0xE, 0xF, 0xC, 0x7, 0x6, 0x0, 0x9, 0xB,
@@ -94,11 +117,7 @@ var Table1 = []byte{
 	0x1, 0xF, 0xD, 0x0, 0x5, 0x7, 0xA, 0x4, 0x9, 0x2, 0x3, 0xE, 0x6, 0xB, 0x8, 0xC,
 }
 
-//----------------------------------------------
-// OID: 1.2.643.7.1.2.5.1.1
-// Идентификатор: id-tc26-gost-28147-param-Z
-
-var Table2 = []byte{
+var table2 = []byte{
 	0xC, 0x4, 0x6, 0x2, 0xA, 0x5, 0xB, 0x9, 0xE, 0x8, 0xD, 0x7, 0x0, 0x3, 0xF, 0x1,
 	0x6, 0x8, 0x2, 0x3, 0x9, 0xA, 0x5, 0xC, 0x1, 0xE, 0x4, 0x7, 0xB, 0xD, 0x0, 0xF,
 	0xB, 0x3, 0x5, 0x8, 0x2, 0xF, 0xA, 0xD, 0xE, 0x1, 0x7, 0x4, 0xC, 0x9, 0x6, 0x0,
@@ -107,4 +126,15 @@ var Table2 = []byte{
 	0x5, 0xD, 0xF, 0x6, 0x9, 0x2, 0xC, 0xA, 0xB, 0x7, 0x8, 0x1, 0x4, 0x3, 0xE, 0x0,
 	0x8, 0xE, 0x2, 0x5, 0x6, 0x9, 0x1, 0xC, 0xF, 0x4, 0xB, 0x0, 0xD, 0xA, 0x3, 0x7,
 	0x1, 0x7, 0xE, 0xD, 0x0, 0x5, 0x8, 0x3, 0x4, 0xF, 0xA, 0x6, 0x9, 0xC, 0xB, 0x2,
+}
+
+func duplicate(a []byte) []byte {
+	b := make([]byte, len(a))
+	copy(b, a)
+	return b
+}
+
+func NewTableDefault() Table {
+	t, _ := NewTable(table1)
+	return t
 }

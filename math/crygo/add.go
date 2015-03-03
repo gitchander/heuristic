@@ -1,7 +1,6 @@
 package crygo
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -19,12 +18,12 @@ func mod(x, y int64) int64 {
 }
 
 // (a + b) mod (2 ^ 32)
-func sum_mod32_v1(a, b uint32) uint32 {
+func add_mod32_v1(a, b uint32) uint32 {
 
 	return a + b
 }
 
-func sum_mod32_v2(a, b uint32) uint32 {
+func add_mod32_v2(a, b uint32) uint32 {
 
 	_a := maxUint32 - a
 	if b > _a {
@@ -33,7 +32,7 @@ func sum_mod32_v2(a, b uint32) uint32 {
 	return (a + b)
 }
 
-func sum_mod32_v3(a, b uint32) uint32 {
+func add_mod32_v3(a, b uint32) uint32 {
 
 	A := int64(a)
 	B := int64(b)
@@ -42,27 +41,27 @@ func sum_mod32_v3(a, b uint32) uint32 {
 	return uint32(mod(A+B, C))
 }
 
-func sumMod32Test(a, b uint32) error {
+func addMod32Test(a, b uint32) error {
 
-	s1 := sum_mod32_v1(a, b)
-	s2 := sum_mod32_v2(a, b)
-	s3 := sum_mod32_v3(a, b)
+	s1 := add_mod32_v1(a, b)
+	s2 := add_mod32_v2(a, b)
+	s3 := add_mod32_v3(a, b)
 
 	const format = "wrong (%d + %d) mod (2^32)"
 
 	if s1 != s2 {
-		return errors.New(fmt.Sprintf(format, a, b))
+		return newError(fmt.Sprintf(format, a, b))
 	}
 
 	if s1 != s3 {
-		return errors.New(fmt.Sprintf(format, a, b))
+		return newError(fmt.Sprintf(format, a, b))
 	}
 
 	return nil
 }
 
 // (a + b) mod (2^32 - 1)*
-func sum_mod32m1(a, b uint32) uint32 {
+func add_mod32m1(a, b uint32) uint32 {
 
 	_a := maxUint32 - a
 	if b > _a {
@@ -71,7 +70,7 @@ func sum_mod32m1(a, b uint32) uint32 {
 	return (a + b)
 }
 
-func sum_mod32m1_sample(a, b uint32) uint32 {
+func add_mod32m1_sample(a, b uint32) uint32 {
 
 	s := int64(a) + int64(b)
 	if s < (1 << 32) {
@@ -81,8 +80,8 @@ func sum_mod32m1_sample(a, b uint32) uint32 {
 	return uint32(s - (1 << 32) + 1)
 }
 
-/*
-func sum_mod32m1_v3(a, b uint32) uint32 {
+// wrong variant!
+func add_mod32m1_wrong(a, b uint32) uint32 {
 
 	A := int64(a)
 	B := int64(b)
@@ -90,15 +89,14 @@ func sum_mod32m1_v3(a, b uint32) uint32 {
 
 	return uint32(mod(A+B-1, C) + 1)
 }
-*/
 
-func sumMod32M1Test(a, b uint32) error {
+func addMod32M1Test(a, b uint32) error {
 
-	s1 := sum_mod32m1(a, b)
-	s2 := sum_mod32m1_sample(a, b)
+	s1 := add_mod32m1(a, b)
+	s2 := add_mod32m1_sample(a, b)
 
 	if s1 != s2 {
-		return errors.New(fmt.Sprintf("wrong (%d + %d) mod (2^32 - 1)*", a, b))
+		return newError(fmt.Sprintf("wrong (%d + %d) mod (2^32 - 1)*", a, b))
 	}
 
 	return nil

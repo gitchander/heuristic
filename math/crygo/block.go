@@ -6,22 +6,15 @@ import (
 
 type blockCipher struct {
 	x []uint32
-	r replacer
+	t Table
 }
 
-func NewBlock(key []byte) (cipher.Block, error) {
+func NewBlockCipher(t Table, key []byte) (cipher.Block, error) {
 
-	return NewBlockTable(key, Table1)
-}
-
-func NewBlockTable(key []byte, table []byte) (cipher.Block, error) {
-
-	block := new(blockCipher)
-	var err error
-
-	if block.r, err = newReplacer256x4(table); err != nil {
-		return nil, err
+	block := &blockCipher{
+		t: t,
 	}
+	var err error
 
 	if block.x, err = newKey(key); err != nil {
 		return nil, err
@@ -44,7 +37,7 @@ func (this *blockCipher) Encrypt(dst, src []byte) {
 		panic("crypto/crygo: output not full block")
 	}
 
-	encryptBlock(this.x, this.r, dst, src)
+	encryptBlock(this.x, this.t, dst, src)
 }
 
 func (this *blockCipher) Decrypt(dst, src []byte) {
@@ -57,5 +50,19 @@ func (this *blockCipher) Decrypt(dst, src []byte) {
 		panic("crypto/crygo: output not full block")
 	}
 
-	decryptBlock(this.x, this.r, dst, src)
+	decryptBlock(this.x, this.t, dst, src)
+}
+
+func newKey(key []byte) ([]uint32, error) {
+
+	if len(key) != KeySize {
+		return nil, newError("wrong key size")
+	}
+
+	xs := make([]uint32, 8)
+	for i, _ := range xs {
+		xs[i] = byteOrder.Uint32(key[i*4:])
+	}
+
+	return xs, nil
 }

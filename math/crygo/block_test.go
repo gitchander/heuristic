@@ -17,7 +17,7 @@ func fillBytes(r *rand.Rand, bs []byte) {
 	}
 }
 
-func TestBlockCrypt(t *testing.T) {
+func TestBlockCipher(t *testing.T) {
 
 	r := newRand()
 
@@ -27,11 +27,13 @@ func TestBlockCrypt(t *testing.T) {
 	s2 := make([]byte, BlockSize)
 	s3 := make([]byte, BlockSize)
 
+	table := NewTableDefault()
+
 	for i := 0; i < 100; i++ {
 
 		fillBytes(r, key)
 
-		c, err := NewBlock(key)
+		c, err := NewBlockCipher(table, key)
 		if err != nil {
 			t.Error(err)
 			return
@@ -70,7 +72,7 @@ func TestSamples(t *testing.T) {
 	}
 
 	var ts = TestSamples{
-		Table: Table2,
+		Table: table2,
 		Key: []byte{
 			0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88,
 			0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x80,
@@ -91,7 +93,13 @@ func TestSamples(t *testing.T) {
 		},
 	}
 
-	c, err := NewBlockTable(ts.Key, ts.Table)
+	table, err := NewTable(ts.Table)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	c, err := NewBlockCipher(table, ts.Key)
 	if err != nil {
 		t.Error(err)
 		return
@@ -107,54 +115,30 @@ func TestSamples(t *testing.T) {
 	}
 }
 
-func TestFastTable(t *testing.T) {
+func TestTables(t *testing.T) {
 
 	r := newRand()
 
-	t11, err := newReplacer256x4(Table1)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	t12, err := newReplacer16x8(Table1)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	t21, err := newReplacer256x4(Table2)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	t22, err := newReplacer16x8(Table2)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
 	type Tables struct {
-		t1 replacer
-		t2 replacer
+		t1 Table
+		t2 Table
 	}
 
 	ts := []Tables{
 		Tables{
-			t11,
-			t12,
+			newReplaceTable4(table1),
+			newReplaceTable8(table1),
 		},
 		Tables{
-			t21,
-			t22,
+			newReplaceTable4(table2),
+			newReplaceTable8(table2),
 		},
 	}
 
 	for _, y := range ts {
 		for i := 0; i < 1000000; i++ {
 			u := r.Uint32()
-			if y.t1.replace(u) != y.t2.replace(u) {
+			if y.t1.Replace(u) != y.t2.Replace(u) {
 				t.Error("wrong mix")
 				return
 			}

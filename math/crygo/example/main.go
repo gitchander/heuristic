@@ -7,9 +7,12 @@ import (
 
 func main() {
 
+	if err := BlockExample(); err != nil {
+		fmt.Println(err.Error())
+	}
+
 	if err := StreamExample(); err != nil {
 		fmt.Println(err.Error())
-		return
 	}
 }
 
@@ -23,7 +26,9 @@ func BlockExample() error {
 	}
 	fmt.Printf("key: [ % x ]\n", key)
 
-	block, err := crygo.NewBlock(key)
+	table := crygo.NewTableDefault()
+
+	blockCipher, err := crygo.NewBlockCipher(table, key)
 	if err != nil {
 		return err
 	}
@@ -32,10 +37,10 @@ func BlockExample() error {
 	b2 := make([]byte, crygo.BlockSize)
 	b3 := make([]byte, crygo.BlockSize)
 
-	block.Encrypt(b2, b1)
+	blockCipher.Encrypt(b2, b1)
 	fmt.Printf("[ % x ]\n", b2)
 
-	block.Decrypt(b3, b2)
+	blockCipher.Decrypt(b3, b2)
 	fmt.Printf("[ % x ]\n", b3)
 
 	return nil
@@ -54,34 +59,36 @@ func StreamExample() error {
 		0xF1, 0x09, 0xAC, 0x11, 0x73, 0xB8, 0x04, 0x13,
 	}
 
-	block, err := crygo.NewBlock(key)
+	table := crygo.NewTableDefault()
+
+	blockCipher, err := crygo.NewBlockCipher(table, key)
 	if err != nil {
 		return err
 	}
 
-	s, err := crygo.NewStream(block, syn)
+	streamCipher, err := crygo.NewStreamCipher(blockCipher, syn)
 	if err != nil {
 		return err
 	}
 
-	b1 := []byte("Выработка гаммы происходит на основе ключа и синхропосылки.")
+	b1 := []byte("中國是中國，台灣和新加坡的官方語言。世界各地的講它超過13十億人")
 	b2 := make([]byte, len(b1))
 	b3 := make([]byte, len(b1))
 
-	s.XORKeyStream(b2, b1)
+	streamCipher.XORKeyStream(b2, b1)
 
 	fmt.Printf("b1: [ % x ]\n", b1)
 	fmt.Printf("b2: [ % x ]\n", b2)
 
-	s, err = crygo.NewStream(block, syn)
+	streamCipher, err = crygo.NewStreamCipher(blockCipher, syn)
 	if err != nil {
 		return err
 	}
 
-	s.XORKeyStream(b3[:5], b2[:5])
-	s.XORKeyStream(b3[5:9], b2[5:9])
-	s.XORKeyStream(b3[9:17], b2[9:17])
-	s.XORKeyStream(b3[17:], b2[17:])
+	streamCipher.XORKeyStream(b3[:5], b2[:5])
+	streamCipher.XORKeyStream(b3[5:9], b2[5:9])
+	streamCipher.XORKeyStream(b3[9:17], b2[9:17])
+	streamCipher.XORKeyStream(b3[17:], b2[17:])
 
 	fmt.Printf("b3: [ % x ]\n", b3)
 	fmt.Println(string(b3))
