@@ -77,3 +77,27 @@ func decryptBlock(xs []uint32, t Table, dst, src []byte) {
 	decrypt(xs, t, n)
 	putTwoUint32(dst, n)
 }
+
+func safeXORBytes(dst, a, b []byte) int {
+
+	n := len(a)
+	if len(b) < n {
+		n = len(b)
+	}
+	for i := 0; i < n; i++ {
+		dst[i] = a[i] ^ b[i]
+	}
+	return n
+}
+
+func duplicate(a []byte) []byte {
+	b := make([]byte, len(a))
+	copy(b, a)
+	return b
+}
+
+func fillBytes(bs []byte, b byte) {
+	for i, _ := range bs {
+		bs[i] = b
+	}
+}

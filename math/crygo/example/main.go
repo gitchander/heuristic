@@ -5,28 +5,22 @@ import (
 	"github.com/gitchander/heuristic/math/crygo"
 )
 
-func main() {
+var (
+	table = crygo.NewTableDefault()
 
-	if err := BlockExample(); err != nil {
-		fmt.Println(err.Error())
-	}
-
-	if err := StreamExample(); err != nil {
-		fmt.Println(err.Error())
-	}
-}
-
-func BlockExample() error {
-
-	key := []byte{
+	key = []byte{
 		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
 		0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27,
 		0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
 	}
-	fmt.Printf("key: [ % x ]\n", key)
 
-	table := crygo.NewTableDefault()
+	syn = []byte{0xF1, 0x09, 0xAC, 0x11, 0x73, 0xB8, 0x04, 0x13}
+)
+
+func BlockExample() error {
+
+	fmt.Printf("key: [ % x ]\n", key)
 
 	blockCipher, err := crygo.NewBlockCipher(table, key)
 	if err != nil {
@@ -48,25 +42,7 @@ func BlockExample() error {
 
 func StreamExample() error {
 
-	key := []byte{
-		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-		0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27,
-		0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
-	}
-
-	syn := []byte{
-		0xF1, 0x09, 0xAC, 0x11, 0x73, 0xB8, 0x04, 0x13,
-	}
-
-	table := crygo.NewTableDefault()
-
 	blockCipher, err := crygo.NewBlockCipher(table, key)
-	if err != nil {
-		return err
-	}
-
-	streamCipher, err := crygo.NewStreamCipher(blockCipher, syn)
 	if err != nil {
 		return err
 	}
@@ -75,23 +51,128 @@ func StreamExample() error {
 	b2 := make([]byte, len(b1))
 	b3 := make([]byte, len(b1))
 
-	streamCipher.XORKeyStream(b2, b1)
+	// Encrypt
+	{
+		se, err := crygo.NewStreamCipher(blockCipher, syn)
+		if err != nil {
+			return err
+		}
 
-	fmt.Printf("b1: [ % x ]\n", b1)
-	fmt.Printf("b2: [ % x ]\n", b2)
+		se.XORKeyStream(b2, b1)
+	}
 
-	streamCipher, err = crygo.NewStreamCipher(blockCipher, syn)
+	// Decrypt
+	{
+		sd, err := crygo.NewStreamCipher(blockCipher, syn)
+		if err != nil {
+			return err
+		}
+
+		sd.XORKeyStream(b3[:5], b2[:5])
+		sd.XORKeyStream(b3[5:9], b2[5:9])
+		sd.XORKeyStream(b3[9:17], b2[9:17])
+		sd.XORKeyStream(b3[17:], b2[17:])
+	}
+
+	const format = "%s: [ % x ]\n"
+	fmt.Printf(format, "b1", b1)
+	fmt.Printf(format, "b2", b2)
+	fmt.Printf(format, "b3", b3)
+
+	fmt.Println(string(b3))
+
+	return nil
+}
+
+func FeedbackExample() error {
+
+	blockCipher, err := crygo.NewBlockCipher(table, key)
 	if err != nil {
 		return err
 	}
 
-	streamCipher.XORKeyStream(b3[:5], b2[:5])
-	streamCipher.XORKeyStream(b3[5:9], b2[5:9])
-	streamCipher.XORKeyStream(b3[9:17], b2[9:17])
-	streamCipher.XORKeyStream(b3[17:], b2[17:])
+	b1 := []byte("中國是中國，台灣和新加坡的官方語言。世界各地的講它超過13十億人")
+	b2 := make([]byte, len(b1))
+	b3 := make([]byte, len(b1))
 
-	fmt.Printf("b3: [ % x ]\n", b3)
+	// Encrypt
+	{
+		fe, err := crygo.NewFeedbackEncrypter(blockCipher, syn)
+		if err != nil {
+			return err
+		}
+
+		fe.Encrypt(b2, b1)
+	}
+
+	// Decrypt
+	{
+		fd, err := crygo.NewFeedbackDecrypter(blockCipher, syn)
+		if err != nil {
+			return err
+		}
+
+		fd.Decrypt(b3[:5], b2[:5])
+		fd.Decrypt(b3[5:9], b2[5:9])
+		fd.Decrypt(b3[9:17], b2[9:17])
+		fd.Decrypt(b3[17:], b2[17:])
+	}
+
+	const format = "%s: [ % x ]\n"
+
+	fmt.Printf(format, "b1", b1)
+	fmt.Printf(format, "b2", b2)
+	fmt.Printf(format, "b3", b3)
+
 	fmt.Println(string(b3))
 
 	return nil
+}
+
+func HashExample() error {
+
+	blockCipher, err := crygo.NewBlockCipher(table, key)
+	if err != nil {
+		return err
+	}
+
+	hash := crygo.NewHash(blockCipher)
+
+	b := []byte("中國是中國，台灣和新加坡的官方語言。世界各地的講它超過13十億人")
+	hash.Write(b)
+	fmt.Printf("hash: [ % x ]\n", hash.Sum(nil))
+
+	s1 := "Hash is the common interface implemented by all hash functions"
+	s2 := "Hash is the Common interface implemented by all hash functions"
+
+	const format = "\"%s\": hash -> [ % x ]\n"
+
+	hash.Reset()
+	hash.Write([]byte(s1))
+	fmt.Printf(format, s1, hash.Sum(nil))
+
+	hash.Reset()
+	hash.Write([]byte(s2))
+	fmt.Printf(format, s2, hash.Sum(nil))
+
+	return nil
+}
+
+func main() {
+
+	if err := BlockExample(); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	if err := StreamExample(); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	if err := FeedbackExample(); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	if err := HashExample(); err != nil {
+		fmt.Println(err.Error())
+	}
 }

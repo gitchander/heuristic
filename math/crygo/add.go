@@ -1,9 +1,5 @@
 package crygo
 
-import (
-	"fmt"
-)
-
 const maxUint32 = (1 << 32) - 1 // 2 ^ 32 - 1
 
 func mod(x, y int64) int64 {
@@ -50,11 +46,11 @@ func addMod32Test(a, b uint32) error {
 	const format = "wrong (%d + %d) mod (2^32)"
 
 	if s1 != s2 {
-		return newError(fmt.Sprintf(format, a, b))
+		return newErrorf(format, a, b)
 	}
 
 	if s1 != s3 {
-		return newError(fmt.Sprintf(format, a, b))
+		return newErrorf(format, a, b)
 	}
 
 	return nil
@@ -96,7 +92,7 @@ func addMod32M1Test(a, b uint32) error {
 	s2 := add_mod32m1_sample(a, b)
 
 	if s1 != s2 {
-		return newError(fmt.Sprintf("wrong (%d + %d) mod (2^32 - 1)*", a, b))
+		return newErrorf("wrong (%d + %d) mod (2^32 - 1)*", a, b)
 	}
 
 	return nil

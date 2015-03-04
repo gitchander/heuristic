@@ -2,20 +2,8 @@ package crygo
 
 import (
 	"bytes"
-	"math/rand"
 	"testing"
-	"time"
 )
-
-func newRand() *rand.Rand {
-	return rand.New(rand.NewSource(time.Now().UnixNano()))
-}
-
-func fillBytes(r *rand.Rand, bs []byte) {
-	for i, _ := range bs {
-		bs[i] = byte(r.Intn(256))
-	}
-}
 
 func TestBlockCipher(t *testing.T) {
 
@@ -31,7 +19,7 @@ func TestBlockCipher(t *testing.T) {
 
 	for i := 0; i < 100; i++ {
 
-		fillBytes(r, key)
+		r.FillBytes(key)
 
 		c, err := NewBlockCipher(table, key)
 		if err != nil {
@@ -41,7 +29,7 @@ func TestBlockCipher(t *testing.T) {
 
 		for j := 0; j < 1000; j++ {
 
-			fillBytes(r, s1)
+			r.FillBytes(s1)
 
 			c.Encrypt(s2, s1)
 			if bytes.Compare(s1, s2) == 0 {

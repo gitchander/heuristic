@@ -21,7 +21,7 @@ func NewStreamCipher(block cipher.Block, syn []byte) (cipher.Stream, error) {
 	size := block.BlockSize()
 
 	if len(syn) != size {
-		return nil, newError("wrong syn len")
+		return nil, ErrorSynLen
 	}
 
 	sc := &streamCipher{
@@ -49,31 +49,21 @@ func (this *streamCipher) nextFill() {
 	putTwoUint32(this.out, s)
 
 	this.block.Encrypt(this.out, this.out)
-
 	this.outIndex = 0
 }
 
 func (this *streamCipher) XORKeyStream(dst, src []byte) {
 
 	for len(src) > 0 {
+
 		if this.outIndex >= len(this.out) {
 			this.nextFill()
 		}
+
 		n := safeXORBytes(dst, src, this.out[this.outIndex:])
+
 		src = src[n:]
 		dst = dst[n:]
 		this.outIndex += n
 	}
-}
-
-func safeXORBytes(dst, a, b []byte) int {
-
-	n := len(a)
-	if len(b) < n {
-		n = len(b)
-	}
-	for i := 0; i < n; i++ {
-		dst[i] = a[i] ^ b[i]
-	}
-	return n
 }
