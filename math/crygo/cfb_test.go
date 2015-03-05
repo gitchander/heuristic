@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestFeedback(t *testing.T) {
+func TestCFB(t *testing.T) {
 
 	key := []byte{
 		0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88,
@@ -47,24 +47,24 @@ func TestFeedback(t *testing.T) {
 
 		// Encrypt
 		{
-			fe, err := NewFeedbackEncrypter(block, syn)
+			e, err := NewCFBEncrypter(block, syn)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
-			fe.Encrypt(s2, s1)
+			e.XORKeyStream(s2, s1)
 		}
 
 		// Decrypt
 		{
-			fd, err := NewFeedbackDecrypter(block, syn)
+			d, err := NewCFBDecrypter(block, syn)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
-			fd.Decrypt(s3, s2)
+			d.XORKeyStream(s3, s2)
 		}
 
 		if bytes.Compare(s1, s3) != 0 {

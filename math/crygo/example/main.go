@@ -84,7 +84,7 @@ func StreamExample() error {
 	return nil
 }
 
-func FeedbackExample() error {
+func CFBExample() error {
 
 	blockCipher, err := crygo.NewBlockCipher(table, key)
 	if err != nil {
@@ -97,25 +97,25 @@ func FeedbackExample() error {
 
 	// Encrypt
 	{
-		fe, err := crygo.NewFeedbackEncrypter(blockCipher, syn)
+		e, err := crygo.NewCFBEncrypter(blockCipher, syn)
 		if err != nil {
 			return err
 		}
 
-		fe.Encrypt(b2, b1)
+		e.XORKeyStream(b2, b1)
 	}
 
 	// Decrypt
 	{
-		fd, err := crygo.NewFeedbackDecrypter(blockCipher, syn)
+		d, err := crygo.NewCFBDecrypter(blockCipher, syn)
 		if err != nil {
 			return err
 		}
 
-		fd.Decrypt(b3[:5], b2[:5])
-		fd.Decrypt(b3[5:9], b2[5:9])
-		fd.Decrypt(b3[9:17], b2[9:17])
-		fd.Decrypt(b3[17:], b2[17:])
+		d.XORKeyStream(b3[:5], b2[:5])
+		d.XORKeyStream(b3[5:9], b2[5:9])
+		d.XORKeyStream(b3[9:17], b2[9:17])
+		d.XORKeyStream(b3[17:], b2[17:])
 	}
 
 	const format = "%s: [ % x ]\n"
@@ -168,7 +168,7 @@ func main() {
 		fmt.Println(err.Error())
 	}
 
-	if err := FeedbackExample(); err != nil {
+	if err := CFBExample(); err != nil {
 		fmt.Println(err.Error())
 	}
 
