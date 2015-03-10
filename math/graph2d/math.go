@@ -19,7 +19,7 @@ func Floor(x float32) float32 {
 }
 
 func Round(x float32) float32 {
-	return (Floor(x) + 0.5)
+	return Floor(x + 0.5)
 }
 
 func Sqrt(x float32) float32 {
