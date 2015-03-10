@@ -97,20 +97,14 @@ func CFBExample() error {
 
 	// Encrypt
 	{
-		e, err := crygo.NewCFBEncrypter(blockCipher, syn)
-		if err != nil {
-			return err
-		}
+		e := crygo.NewCFBEncrypter(blockCipher, syn)
 
 		e.XORKeyStream(b2, b1)
 	}
 
 	// Decrypt
 	{
-		d, err := crygo.NewCFBDecrypter(blockCipher, syn)
-		if err != nil {
-			return err
-		}
+		d := crygo.NewCFBDecrypter(blockCipher, syn)
 
 		d.XORKeyStream(b3[:5], b2[:5])
 		d.XORKeyStream(b3[5:9], b2[5:9])

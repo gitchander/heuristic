@@ -6,11 +6,11 @@ import (
 
 // Cipher Feedback Mode - CFB
 
-func NewCFBEncrypter(block cipher.Block, syn []byte) (cipher.Stream, error) {
+func NewCFBEncrypter(block cipher.Block, syn []byte) cipher.Stream {
 	return newCFBCipher(block, syn, false)
 }
 
-func NewCFBDecrypter(block cipher.Block, syn []byte) (cipher.Stream, error) {
+func NewCFBDecrypter(block cipher.Block, syn []byte) cipher.Stream {
 	return newCFBCipher(block, syn, true)
 }
 
@@ -22,12 +22,12 @@ type cfb struct {
 	decrypt bool
 }
 
-func newCFBCipher(block cipher.Block, syn []byte, decrypt bool) (*cfb, error) {
+func newCFBCipher(block cipher.Block, syn []byte, decrypt bool) cipher.Stream {
 
 	blockSize := block.BlockSize()
 
 	if len(syn) != blockSize {
-		return nil, ErrorSynLen
+		panic("crygo.newCFBCipher: SYN length must equal block size")
 	}
 
 	out := make([]byte, blockSize)
@@ -38,7 +38,7 @@ func newCFBCipher(block cipher.Block, syn []byte, decrypt bool) (*cfb, error) {
 		out:      out,
 		outIndex: blockSize,
 		decrypt:  decrypt,
-	}, nil
+	}
 }
 
 func (this *cfb) XORKeyStream(dst, src []byte) {

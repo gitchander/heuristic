@@ -2,17 +2,6 @@ package crygo
 
 const maxUint32 = (1 << 32) - 1 // 2 ^ 32 - 1
 
-func mod(x, y int64) int64 {
-
-	t := x % y
-
-	if t < 0 {
-		t += y
-	}
-
-	return t
-}
-
 // (a + b) mod (2 ^ 32)
 func add_mod32_v1(a, b uint32) uint32 {
 

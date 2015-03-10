@@ -17,10 +17,11 @@ type privRandomer struct {
 }
 
 func newRand() randomer {
+	return &privRandomer{rand.New(rand.NewSource(time.Now().UnixNano()))}
+}
 
-	return &privRandomer{
-		r: rand.New(rand.NewSource(time.Now().UnixNano())),
-	}
+func newRandSeed(seed int64) randomer {
+	return &privRandomer{rand.New(rand.NewSource(seed))}
 }
 
 func (this *privRandomer) Intn(n int) int {
@@ -31,16 +32,10 @@ func (this *privRandomer) Uint32() uint32 {
 	return this.r.Uint32()
 }
 
-func quo_rem(x, y int) (q, r int) {
-	q = x / y
-	r = x - q*y
-	return
-}
-
 func (this *privRandomer) FillBytes(data []byte) {
 
 	const sizeOfUint32 = 4
-	quo, rem := quo_rem(len(data), sizeOfUint32)
+	quo, rem := quoRem(len(data), sizeOfUint32)
 
 	if quo > 0 {
 		bo := binary.BigEndian

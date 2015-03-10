@@ -1,15 +1,9 @@
 package crygo
 
-import (
-	"encoding/binary"
-)
-
 const (
 	BlockSize = 8
 	KeySize   = 32
 )
-
-var byteOrder = binary.LittleEndian
 
 func baseStep(n []uint32, x uint32, t Table) {
 
@@ -50,20 +44,6 @@ func decrypt(xs []uint32, t Table, n []uint32) {
 	n[0], n[1] = n[1], n[0]
 }
 
-func getTwoUint32(src []byte) []uint32 {
-
-	return []uint32{
-		byteOrder.Uint32(src[0:4]),
-		byteOrder.Uint32(src[4:8]),
-	}
-}
-
-func putTwoUint32(dst []byte, src []uint32) {
-
-	byteOrder.PutUint32(dst[0:4], src[0])
-	byteOrder.PutUint32(dst[4:8], src[1])
-}
-
 func encryptBlock(xs []uint32, t Table, dst, src []byte) {
 
 	n := getTwoUint32(src)
@@ -76,28 +56,4 @@ func decryptBlock(xs []uint32, t Table, dst, src []byte) {
 	n := getTwoUint32(src)
 	decrypt(xs, t, n)
 	putTwoUint32(dst, n)
-}
-
-func safeXORBytes(dst, a, b []byte) int {
-
-	n := len(a)
-	if len(b) < n {
-		n = len(b)
-	}
-	for i := 0; i < n; i++ {
-		dst[i] = a[i] ^ b[i]
-	}
-	return n
-}
-
-func duplicate(a []byte) []byte {
-	b := make([]byte, len(a))
-	copy(b, a)
-	return b
-}
-
-func fillBytes(bs []byte, b byte) {
-	for i, _ := range bs {
-		bs[i] = b
-	}
 }
