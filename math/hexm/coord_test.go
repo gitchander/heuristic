@@ -55,13 +55,13 @@ func neighborAxis(c Coord, axis int, nd NeighborDir) (Coord, error) {
 
 	switch axis {
 	case 0:
-		return c.NeighborX(nd)
+		return NeighborX(c, nd)
 
 	case 1:
-		return c.NeighborY(nd)
+		return NeighborY(c, nd)
 
 	case 2:
-		return c.NeighborZ(nd)
+		return NeighborZ(c, nd)
 	}
 
 	return nil, errors.New("Wrong neighbor axis")
