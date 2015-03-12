@@ -12,7 +12,7 @@ type digest struct {
 	srcIndex int
 }
 
-func NewHash(block cipher.Block) hash.Hash {
+func NewHash(block cipher.Block) hash.Hash64 {
 	return &digest{
 		block: block,
 		out:   make([]byte, block.BlockSize()),
@@ -72,6 +72,12 @@ func (this *digest) Sum(in []byte) []byte {
 
 	hash := this.checkSum()
 	return append(in, hash...)
+}
+
+func (this *digest) Sum64() uint64 {
+
+	hash := this.checkSum()
+	return byteOrder.Uint64(hash)
 }
 
 func (this *digest) Reset() {
