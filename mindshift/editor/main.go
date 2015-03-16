@@ -9,6 +9,7 @@ import (
 	//"github.com/mattn/go-gtk/glib"
 
 	"github.com/mattn/go-gtk/gtk"
+	//"github.com/ungerik/go-cairo"
 )
 
 func main() {
@@ -132,6 +133,9 @@ func newDrawingArea() gtk.IWidget {
 	})
 
 	drawingArea.Connect("expose-event", func() {
+
+		//s := cairo.NewSurfaceFromC(nil, drawingArea.GetWindow())
+
 		if pixmap != nil {
 			drawingArea.GetWindow().GetDrawable().DrawDrawable(gc, pixmap.GetDrawable(), 0, 0, 0, 0, -1, -1)
 		}
