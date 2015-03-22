@@ -88,6 +88,101 @@ func vectorInCell(v graph2d.Vector, c Coord) bool {
 	return graph2d.VectorInPolygon(v, vs)
 }
 
+func hexIndexes(x, y float32) (dx, dy int) {
+
+	if y < 1.0-x {
+
+		switch {
+		case (y > x*0.5+0.5):
+			dx, dy = 0, 1
+
+		case (y < x*2.0-1.0):
+			dx, dy = 1, 0
+
+		default:
+			dx, dy = 0, 0
+		}
+
+	} else {
+		switch {
+		case (y > x*2.0):
+			dx, dy = 0, 1
+
+		case (y < x*0.5):
+			dx, dy = 1, 0
+
+		default:
+			dx, dy = 1, 1
+		}
+	}
+
+	return
+}
+
+func vectorToCoordXY(v graph2d.Vector) (Coord, error) {
+
+	var (
+		X = v.X / factorX
+		Y = 0.5 * (v.X/factorX - v.Y/factorY)
+	)
+
+	var (
+		fX = graph2d.Floor(X)
+		fY = graph2d.Floor(Y)
+	)
+
+	dx, dy := hexIndexes(X-fX, Y-fY)
+	c, err := NewCoord(int(fX)+dx, int(fY)+dy, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func vectorToCoordYZ(v graph2d.Vector) (Coord, error) {
+
+	var (
+		Y = -0.5 * (v.X/factorX + v.Y/factorY)
+		Z = -v.X / factorX
+	)
+
+	var (
+		fY = graph2d.Floor(Y)
+		fZ = graph2d.Floor(Z)
+	)
+
+	dy, dz := hexIndexes(Y-fY, Z-fZ)
+	c, err := NewCoord(0, int(fY)+dy, int(fZ)+dz)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func vectorToCoordZX(v graph2d.Vector) (Coord, error) {
+
+	var (
+		Z = 0.5 * (v.Y/factorY - v.X/factorX)
+		X = 0.5 * (v.X/factorX + v.Y/factorY)
+	)
+
+	var (
+		fZ = graph2d.Floor(Z)
+		fX = graph2d.Floor(X)
+	)
+
+	dz, dx := hexIndexes(Z-fZ, X-fX)
+	c, err := NewCoord(int(fX)+dx, 0, int(fZ)+dz)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+/*
 func vectorToCoordXY(v graph2d.Vector) (Coord, error) {
 
 	var (
@@ -174,3 +269,4 @@ func vectorToCoordZX(v graph2d.Vector) (Coord, error) {
 
 	return nil, ErrorVectorToCoord
 }
+*/
