@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	gogdk "github.com/gitchander/go-lang/gtk/gdk"
+	mygdk "github.com/gitchander/go-lang/gtk/gdk"
 	"github.com/gitchander/heuristic/math/cubspl"
 
 	"github.com/conformal/gotk3/cairo"
@@ -69,7 +69,7 @@ func runGUI(e *SplineEditor) error {
 
 		drawingArea.Connect("button-press-event", func(da *gtk.DrawingArea, event *gdk.Event) {
 
-			var eb gogdk.EventButton
+			var eb mygdk.EventButton
 			eb.FromNative(event.Native())
 
 			x, y := eb.Pos()
@@ -85,10 +85,10 @@ func runGUI(e *SplineEditor) error {
 
 		drawingArea.Connect("motion-notify-event", func(da *gtk.DrawingArea, event *gdk.Event) {
 
-			var em gogdk.EventMotion
+			var em mygdk.EventMotion
 			em.FromNative(event.Native())
 
-			if (gogdk.EventMask(em.State()) & gogdk.BUTTON_PRESS_MASK) != 0 {
+			if (mygdk.EventMask(em.State()) & mygdk.BUTTON_PRESS_MASK) != 0 {
 				if e.ButtonMove(em.Pos()) {
 					da.QueueDraw()
 				}
@@ -102,10 +102,10 @@ func runGUI(e *SplineEditor) error {
 	}
 
 	drawingArea.SetEvents(int(
-		gogdk.POINTER_MOTION_MASK |
-			gogdk.POINTER_MOTION_HINT_MASK |
-			gogdk.BUTTON_PRESS_MASK |
-			gogdk.BUTTON_RELEASE_MASK))
+		mygdk.POINTER_MOTION_MASK |
+			mygdk.POINTER_MOTION_HINT_MASK |
+			mygdk.BUTTON_PRESS_MASK |
+			mygdk.BUTTON_RELEASE_MASK))
 
 	window.Add(drawingArea)
 	window.SetTitle(e.Name())

@@ -44,7 +44,7 @@ func errorPoints(ps []Point) error {
 		if x < ps[i].X {
 			x = ps[i].X
 		} else {
-			return newErrorf("CubicSpline: x[%d] >= x[%d]", i-1, i)
+			return newErrorf("points error: x[%d] >= x[%d]", i-1, i)
 		}
 	}
 

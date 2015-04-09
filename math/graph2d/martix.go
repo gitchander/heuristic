@@ -80,17 +80,13 @@ func (m *matrix) Scale(x, y float32) {
 	m[7] *= y
 }
 
-/*
-
-func (m *matrix) Move(x, y float32) {
+func (m *matrix) prevMove(x, y float32) {
 	m.mul(newMatrixMove(x, y))
 }
 
-func (m *matrix) Scale(x, y float32) {
+func (m *matrix) prevScale(x, y float32) {
 	m.mul(newMatrixScale(x, y))
 }
-
-*/
 
 func (m *matrix) Rotate(angle float32) {
 	m.mul(newMatrixRotate(angle))
@@ -102,7 +98,7 @@ func (m *matrix) Apply(v Vector) (w Vector) {
 
 func (m *matrix) Invert() Transform {
 	n := new(matrix)
-	invert(m, n)
+	invert(m[:], n[:])
 	return n
 }
 
@@ -111,7 +107,7 @@ func (m *matrix) mulVectorL(v Vector) (w Vector) {
 
 	var _v, _w vect3
 	_v.fromVector(v)
-	matrix_mul_vector(m, &_v, &_w)
+	matrix_mul_vector(m[:], _v[:], _w[:])
 	w = _w.toVector()
 
 	return
@@ -122,7 +118,7 @@ func (m *matrix) mulVectorR(v Vector) (w Vector) {
 
 	var _v, _w vect3
 	_v.fromVector(v)
-	vector_mul_matrix(&_v, m, &_w)
+	vector_mul_matrix(_v[:], m[:], _w[:])
 	w = _w.toVector()
 
 	return
@@ -151,7 +147,7 @@ func (x *matrix) mul(y *matrix) *matrix {
 	return x
 }
 
-func det(m *matrix) (d float32) {
+func det(m []float32) (d float32) {
 
 	d += m[0] * (m[4]*m[8] - m[5]*m[7])
 	d -= m[1] * (m[3]*m[8] - m[5]*m[6])
@@ -160,33 +156,33 @@ func det(m *matrix) (d float32) {
 	return
 }
 
-func transpose(m *matrix) {
+func transpose(m []float32) {
 
 	m[1], m[3] = m[3], m[1]
 	m[2], m[6] = m[6], m[2]
 	m[5], m[7] = m[7], m[5]
 }
 
-func invert(n, m *matrix) {
+func invert(n, m []float32) {
 
-	invDet := 1.0 / det(n)
+	inv_det := 1.0 / det(n)
 
-	m[0] = +invDet * (n[4]*n[8] - n[5]*n[7])
-	m[1] = -invDet * (n[3]*n[8] - n[5]*n[6])
-	m[2] = +invDet * (n[3]*n[7] - n[4]*n[6])
+	m[0] = +inv_det * (n[4]*n[8] - n[5]*n[7])
+	m[1] = -inv_det * (n[3]*n[8] - n[5]*n[6])
+	m[2] = +inv_det * (n[3]*n[7] - n[4]*n[6])
 
-	m[3] = -invDet * (n[1]*n[8] - n[2]*n[7])
-	m[4] = +invDet * (n[0]*n[8] - n[2]*n[6])
-	m[5] = -invDet * (n[0]*n[7] - n[1]*n[6])
+	m[3] = -inv_det * (n[1]*n[8] - n[2]*n[7])
+	m[4] = +inv_det * (n[0]*n[8] - n[2]*n[6])
+	m[5] = -inv_det * (n[0]*n[7] - n[1]*n[6])
 
-	m[6] = +invDet * (n[1]*n[5] - n[2]*n[4])
-	m[7] = -invDet * (n[0]*n[5] - n[2]*n[3])
-	m[8] = +invDet * (n[0]*n[4] - n[1]*n[3])
+	m[6] = +inv_det * (n[1]*n[5] - n[2]*n[4])
+	m[7] = -inv_det * (n[0]*n[5] - n[2]*n[3])
+	m[8] = +inv_det * (n[0]*n[4] - n[1]*n[3])
 
 	transpose(m)
 }
 
-func vector_mul_matrix(v *vect3, m *matrix, w *vect3) {
+func vector_mul_matrix(v, m, w []float32) {
 
 	a, b, c := v[0], v[1], v[2]
 
@@ -195,7 +191,7 @@ func vector_mul_matrix(v *vect3, m *matrix, w *vect3) {
 	w[2] = a*m[2] + b*m[5] + c*m[8]
 }
 
-func matrix_mul_vector(m *matrix, v *vect3, w *vect3) {
+func matrix_mul_vector(m, v, w []float32) {
 
 	a, b, c := v[0], v[1], v[2]
 

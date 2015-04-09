@@ -123,7 +123,6 @@ func NeighborZ(c Coord, nd NeighborDir) (Coord, error) {
 	return NewCoord(x, y, z)
 }
 
-// return true if other is neighbor off this
 func IsNeighbors(a, b Coord) bool {
 
 	var n Coord

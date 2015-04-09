@@ -11,7 +11,7 @@ var (
 )
 
 func newError(m string) error {
-	return errors.New(fmt.Sprintf("cubspl.%s", m))
+	return errors.New(fmt.Sprintf("cubspl: %s", m))
 }
 
 func newErrorf(format string, a ...interface{}) error {
