@@ -6,11 +6,11 @@ import (
 )
 
 func newError(m string) error {
-	return errors.New(fmt.Sprintf("hexm.%s", m))
+	return errors.New(fmt.Sprintf("hexm: %s", m))
 }
 
 func newErrorCoord(m string) error {
-	return newError(fmt.Sprintf("Coord.%s", m))
+	return newError(fmt.Sprintf("Coord: %s", m))
 }
 
 var (

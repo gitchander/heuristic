@@ -128,26 +128,26 @@ func IsNeighbors(a, b Coord) bool {
 	var n Coord
 
 	// X neighbors
-	if n, _ = NeighborX(a, ND_POSITIVE); n.Equal(b) {
+	if n, _ = NeighborX(a, ND_POSITIVE); CoordEqual(n, b) {
 		return true
 	}
-	if n, _ = NeighborX(a, ND_NEGATIVE); n.Equal(b) {
+	if n, _ = NeighborX(a, ND_NEGATIVE); CoordEqual(n, b) {
 		return true
 	}
 
 	// Y neighbors
-	if n, _ = NeighborY(a, ND_POSITIVE); n.Equal(b) {
+	if n, _ = NeighborY(a, ND_POSITIVE); CoordEqual(n, b) {
 		return true
 	}
-	if n, _ = NeighborY(a, ND_NEGATIVE); n.Equal(b) {
+	if n, _ = NeighborY(a, ND_NEGATIVE); CoordEqual(n, b) {
 		return true
 	}
 
 	// Z neighbors
-	if n, _ = NeighborZ(a, ND_POSITIVE); n.Equal(b) {
+	if n, _ = NeighborZ(a, ND_POSITIVE); CoordEqual(n, b) {
 		return true
 	}
-	if n, _ = NeighborZ(a, ND_NEGATIVE); n.Equal(b) {
+	if n, _ = NeighborZ(a, ND_NEGATIVE); CoordEqual(n, b) {
 		return true
 	}
 

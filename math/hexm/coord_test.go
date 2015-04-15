@@ -97,7 +97,7 @@ func TestCoordNeighbors(t *testing.T) {
 			return
 		}
 
-		if !(a.Equal(c)) {
+		if !CoordEqual(a, c) {
 			t.Error(errors.New("not equal"))
 			return
 		}
@@ -127,7 +127,7 @@ func TestCoordToVector(t *testing.T) {
 			return
 		}
 
-		if !(a.Equal(b)) {
+		if !CoordEqual(a, b) {
 			t.Error(errors.New("not equal"))
 			return
 		}

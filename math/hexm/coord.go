@@ -1,12 +1,10 @@
 package hexm
 
 type Coord interface {
-	GetCoord() (x, y, z int)	
-	Equal(other Coord) bool // return true if other equal this
-	IsZero() bool
+	GetCoord() (x, y, z int)
 }
 
-type privCoord struct {
+type coordXYZ struct {
 	x, y, z int
 }
 
@@ -20,37 +18,41 @@ func NewCoord(x, y, z int) (Coord, error) {
 		return nil, ErrorCoordOneZeroParameter
 	}
 
-	return &privCoord{x, y, z}, nil
+	return &coordXYZ{x, y, z}, nil
 }
 
-func (this *privCoord) GetCoord() (x, y, z int) {
+func (c *coordXYZ) GetCoord() (x, y, z int) {
 
-	x = this.x
-	y = this.y
-	z = this.z
+	x = c.x
+	y = c.y
+	z = c.z
 
 	return
 }
 
-func (this *privCoord) Equal(other Coord) bool {
+func CoordEqual(a, b Coord) bool {
 
-	x, y, z := other.GetCoord()
+	aX, aY, aZ := a.GetCoord()
+	bX, bY, bZ := b.GetCoord()
 
-	if this.x != x {
+	if aX != bX {
 		return false
 	}
 
-	if this.y != y {
+	if aY != bY {
 		return false
 	}
 
-	if this.z != z {
+	if aZ != bZ {
 		return false
 	}
 
 	return true
 }
 
-func (this *privCoord) IsZero() bool {
-	return (this.x == 0) && (this.y == 0) && (this.z == 0)
+func CoordIsZero(c Coord) bool {
+
+	x, y, z := c.GetCoord()
+
+	return (x == 0) && (y == 0) && (z == 0)
 }

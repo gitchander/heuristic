@@ -132,21 +132,21 @@ func (this *privMatrix) indexToCoord(index int) (Coord, error) {
 	case (index >= this.indexZX): // matrix zx
 		{
 			y = 0
-			x, z = divmod(index-this.indexZX, sizeZ)
+			x, z = quoRem(index-this.indexZX, sizeZ)
 			x++
 		}
 
 	case (index >= this.indexYZ): // matrix yz
 		{
 			x = 0
-			z, y = divmod(index-this.indexYZ, sizeY)
+			z, y = quoRem(index-this.indexYZ, sizeY)
 			z++
 		}
 
 	case (index >= this.indexXY): // matrix xy
 		{
 			z = 0
-			y, x = divmod(index-this.indexXY, sizeX)
+			y, x = quoRem(index-this.indexXY, sizeX)
 			y++
 		}
 

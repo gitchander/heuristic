@@ -4,22 +4,19 @@ import (
 	"github.com/gitchander/heuristic/math/graph2d"
 )
 
-const (
-	sqrtThree = 1.73205080757 // sqrt(3)
-)
+const sqrtThree = 1.73205080757 // sqrt(3)
 
 const (
 	factorX = 1.5
 	factorY = sqrtThree * 0.5
 )
 
-// dividend / divisor= quotient
-// dividend % divisor= remainder
-// dividend = quotient * divisor + remainder
-func divmod(dividend, divisor int) (quotient, remainder int) {
+// quo = x / y
+// rem = x % y
+func quoRem(x, y int) (quo, rem int) {
 
-	quotient = dividend / divisor
-	remainder = dividend - quotient*divisor
+	quo = x / y
+	rem = x - quo*y
 
 	return
 }
