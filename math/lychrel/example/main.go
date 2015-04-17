@@ -20,7 +20,7 @@ func numberTest(v uint64) {
 
 	for i := 0; i < 10; i++ {
 
-		number = lychrel.LychrelTest(n, count)
+		number = lychrel.Test(n, count)
 		iter += number
 		if number < count {
 			break
@@ -46,8 +46,8 @@ func main() {
 
 	numberTest(10)
 	numberTest(57)
-	numberTest(196)
 	numberTest(1186060307891929990)
+	numberTest(196)
 
 	rd := lychrel.FindLychrelNumbers(10000, 10)
 	fmt.Println(rd)

@@ -11,79 +11,72 @@ type carryTemp struct {
 
 var TableBase10 = NewTable(10)
 
-type ctTable struct {
+type Table struct {
 	base int
 	cts  []*carryTemp
 }
 
-func NewTable(base int) *ctTable {
+func NewTable(base int) *Table {
 
 	if (base <= 0) || (base > len(digs)) {
 		return nil
 	}
 
 	cts := make([]*carryTemp, base*2)
-	var quotient, remainder uint64
+	var quo, rem uint64
 
 	for i, _ := range cts {
-		quotient, remainder = divmod(uint64(i), uint64(base))
+		quo, rem = quoRem(uint64(i), uint64(base))
 		cts[i] = &carryTemp{
-			carry: byte(quotient),
-			temp:  byte(remainder),
+			carry: byte(quo),
+			temp:  byte(rem),
 		}
 	}
 
-	return &ctTable{
+	return &Table{
 		base: base,
 		cts:  cts,
 	}
 }
 
-func divmod(dividend, divisor uint64) (quotient, remainder uint64) {
+func quoRem(x, y uint64) (quo, rem uint64) {
 
-	quotient = dividend / divisor
-	remainder = dividend - quotient*divisor
+	quo = x / y
+	rem = x - quo*y
 
 	return
 }
 
-type Number interface {
-	IsPalindrome() bool
-	ReverseThenAdd()
-	String() string
-	CountDigits() int
-}
-
-type privNumber struct {
+type Number struct {
 	b []byte
-	t *ctTable
+	t *Table
 }
 
-func NewNumber(val uint64) Number {
+func NewNumber(val uint64) *Number {
 	return NewNumberTable(TableBase10, val)
 }
 
-func NewNumberTable(t *ctTable, val uint64) Number {
+func NewNumberTable(t *Table, val uint64) *Number {
 
 	var (
-		bs        []byte
-		remainder uint64
+		bs  []byte
+		rem uint64
 	)
 
 	ubase := uint64(t.base)
 
 	for val > 0 {
-		val, remainder = divmod(val, ubase)
-		bs = append(bs, byte(remainder))
+		val, rem = quoRem(val, ubase)
+		bs = append(bs, byte(rem))
 	}
 
-	return &privNumber{
+	return &Number{
 		b: bs,
 		t: t,
 	}
 }
 
-func (this *privNumber) IsPalindrome() bool {
+func (this *Number) IsPalindrome() bool {
 
 	b := this.b
 
@@ -100,7 +93,7 @@ func (this *privNumber) IsPalindrome() bool {
 	return true
 }
 
-func (this *privNumber) reverseThenAdd_1() {
+func (this *Number) reverseThenAdd_1() {
 
 	b := this.b
 	n := len(b)
@@ -143,7 +136,7 @@ func (this *privNumber) reverseThenAdd_1() {
 	}
 }
 
-func (this *privNumber) reverseThenAdd_2() {
+func (this *Number) reverseThenAdd_2() {
 
 	b := this.b
 	n := len(b)
@@ -197,13 +190,13 @@ func (this *privNumber) reverseThenAdd_2() {
 	}
 }
 
-func (this *privNumber) ReverseThenAdd() {
+func (this *Number) ReverseThenAdd() {
 
 	//this.reverseThenAdd_1()
 	this.reverseThenAdd_2()
 }
 
-func (this *privNumber) String() string {
+func (this *Number) String() string {
 
 	b := this.b
 	buffer := new(bytes.Buffer)
@@ -217,16 +210,12 @@ func (this *privNumber) String() string {
 	return buffer.String()
 }
 
-func (this *privNumber) CountDigits() (n int) {
+func (this *Number) CountDigits() int {
 
-	if this != nil {
-		n = len(this.b)
-	}
-
-	return
+	return len(this.b)
 }
 
-func LychrelTest(n Number, count int) int {
+func Test(n *Number, count int) int {
 
 	for i := 0; i < count; i++ {
 
@@ -249,7 +238,7 @@ func FindLychrelNumbers(max uint64, base int) []uint64 {
 	for i := uint64(1); i < max; i++ {
 
 		n := NewNumberTable(t, i)
-		number := LychrelTest(n, count)
+		number := Test(n, count)
 		if number == count {
 			ns = append(ns, i)
 		}
