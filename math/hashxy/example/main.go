@@ -12,7 +12,7 @@ func newRand() *rand.Rand {
 	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func randomPoint(r *rand.Rand) hashxy.Point {
+func randPoint(r *rand.Rand) hashxy.Point {
 
 	const c = 10000
 	return hashxy.Point{
@@ -32,7 +32,7 @@ func MatrixExample() {
 
 	r := newRand()
 	for i := 0; i < 100; i++ {
-		m.Set(randomPoint(r), r.Intn(1000))
+		m.Set(randPoint(r), r.Intn(1000))
 	}
 
 	/*
