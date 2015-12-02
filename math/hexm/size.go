@@ -1,48 +1,35 @@
 package hexm
 
-type Size interface {
-	GetSize() (sizeX, sizeY, sizeZ int)
-	Сontained(c Coord) bool
-	IsEmpty() bool
+type Size struct {
+	Dx, Dy, Dz int
 }
 
-type privSize struct {
-	sizeX, sizeY, sizeZ int
-}
+func (s Size) getError() error {
 
-func NewSize(sizeX, sizeY, sizeZ int) (Size, error) {
-
-	if (sizeX <= 0) || (sizeY <= 0) || (sizeZ <= 0) {
-		return nil, ErrorSizeZeroParameter
+	if (s.Dx <= 0) || (s.Dy <= 0) || (s.Dz <= 0) {
+		return ErrorSizeZeroParameter
 	}
 
-	return &privSize{sizeX, sizeY, sizeZ}, nil
+	return nil
 }
 
-func (this *privSize) GetSize() (sizeX, sizeY, sizeZ int) {
-
-	sizeX = this.sizeX
-	sizeY = this.sizeY
-	sizeZ = this.sizeZ
-
-	return
+func (s Size) IsValid() bool {
+	return (s.getError() == nil)
 }
 
-func (this *privSize) IsEmpty() bool {
-	return (this.sizeX == 0) || (this.sizeY == 0) || (this.sizeZ == 0)
+func (s Size) IsEmpty() bool {
+	return (s.Dx == 0) || (s.Dy == 0) || (s.Dz == 0)
 }
 
-func (this *privSize) Сontained(c Coord) bool {
+func (s Size) Сontained(c Coord) bool {
 
-	x, y, z := c.GetCoord()
-
-	if (x < 0) || (x >= this.sizeX) {
+	if (c.X < 0) || (c.X >= s.Dx) {
 		return false
 	}
-	if (y < 0) || (y >= this.sizeY) {
+	if (c.Y < 0) || (c.Y >= s.Dy) {
 		return false
 	}
-	if (z < 0) || (z >= this.sizeZ) {
+	if (c.Z < 0) || (c.Z >= s.Dz) {
 		return false
 	}
 

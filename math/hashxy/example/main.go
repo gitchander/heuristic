@@ -23,11 +23,6 @@ func randPoint(r *rand.Rand) hashxy.Point {
 
 func main() {
 
-	MatrixExample()
-}
-
-func MatrixExample() {
-
 	m := hashxy.NewMatrix(11, 13)
 
 	r := newRand()

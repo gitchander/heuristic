@@ -1,58 +1,61 @@
 package hexm
 
-type Coord interface {
-	GetCoord() (x, y, z int)
+type Coord struct {
+	X, Y, Z int
 }
 
-type coordXYZ struct {
-	x, y, z int
-}
+func (c Coord) getError() error {
 
-func NewCoord(x, y, z int) (Coord, error) {
-
-	if (x < 0) || (y < 0) || (z < 0) {
-		return nil, ErrorCoordNegativeParameter
+	if (c.X < 0) || (c.Y < 0) || (c.Z < 0) {
+		return ErrorCoordNegativeParameter
 	}
 
-	if (x != 0) && (y != 0) && (z != 0) {
-		return nil, ErrorCoordOneZeroParameter
+	if (c.X != 0) && (c.Y != 0) && (c.Z != 0) {
+		return ErrorCoordOneZeroParameter
 	}
 
-	return &coordXYZ{x, y, z}, nil
+	return nil
 }
 
-func (c *coordXYZ) GetCoord() (x, y, z int) {
+func (c *Coord) get_XYZ() (x, y, z int) {
 
-	x = c.x
-	y = c.y
-	z = c.z
+	x = c.X
+	y = c.Y
+	z = c.Z
 
 	return
 }
 
-func CoordEqual(a, b Coord) bool {
+func (c *Coord) set_XYZ(x, y, z int) {
 
-	aX, aY, aZ := a.GetCoord()
-	bX, bY, bZ := b.GetCoord()
+	c.X = x
+	c.Y = y
+	c.Z = z
 
-	if aX != bX {
+	return
+}
+
+func (c Coord) IsValid() bool {
+	return (c.getError() == nil)
+}
+
+func (a Coord) Equal(b Coord) bool {
+
+	if a.X != b.X {
 		return false
 	}
 
-	if aY != bY {
+	if a.Y != b.Y {
 		return false
 	}
 
-	if aZ != bZ {
+	if a.Z != b.Z {
 		return false
 	}
 
 	return true
 }
 
-func CoordIsZero(c Coord) bool {
-
-	x, y, z := c.GetCoord()
-
-	return (x == 0) && (y == 0) && (z == 0)
+func (c Coord) IsZero() bool {
+	return (c.X == 0) && (c.Y == 0) && (c.Z == 0)
 }

@@ -12,9 +12,13 @@ func (nd NeighborDir) IsValid() bool {
 	return (nd == ND_POSITIVE) || (nd == ND_NEGATIVE)
 }
 
-func NeighborX(c Coord, nd NeighborDir) (Coord, error) {
+func NeighborX(c Coord, nd NeighborDir) (n Coord, err error) {
 
-	x, y, z := c.GetCoord()
+	if err = c.getError(); err != nil {
+		return
+	}
+
+	x, y, z := c.get_XYZ()
 
 	switch nd {
 
@@ -43,15 +47,22 @@ func NeighborX(c Coord, nd NeighborDir) (Coord, error) {
 		}
 
 	default:
-		return nil, ErrorNeighborDirInvalid
+		err = ErrorNeighborDirInvalid
+		return
 	}
 
-	return NewCoord(x, y, z)
+	n.set_XYZ(x, y, z)
+
+	return
 }
 
-func NeighborY(c Coord, nd NeighborDir) (Coord, error) {
+func NeighborY(c Coord, nd NeighborDir) (n Coord, err error) {
 
-	x, y, z := c.GetCoord()
+	if err = c.getError(); err != nil {
+		return
+	}
+
+	x, y, z := c.get_XYZ()
 
 	switch nd {
 
@@ -80,15 +91,22 @@ func NeighborY(c Coord, nd NeighborDir) (Coord, error) {
 		}
 
 	default:
-		return nil, ErrorNeighborDirInvalid
+		err = ErrorNeighborDirInvalid
+		return
 	}
 
-	return NewCoord(x, y, z)
+	n.set_XYZ(x, y, z)
+
+	return
 }
 
-func NeighborZ(c Coord, nd NeighborDir) (Coord, error) {
+func NeighborZ(c Coord, nd NeighborDir) (n Coord, err error) {
 
-	x, y, z := c.GetCoord()
+	if err = c.getError(); err != nil {
+		return
+	}
+
+	x, y, z := c.get_XYZ()
 
 	switch nd {
 
@@ -117,10 +135,13 @@ func NeighborZ(c Coord, nd NeighborDir) (Coord, error) {
 		}
 
 	default:
-		return nil, ErrorNeighborDirInvalid
+		err = ErrorNeighborDirInvalid
+		return
 	}
 
-	return NewCoord(x, y, z)
+	n.set_XYZ(x, y, z)
+
+	return
 }
 
 func IsNeighbors(a, b Coord) bool {
@@ -128,26 +149,26 @@ func IsNeighbors(a, b Coord) bool {
 	var n Coord
 
 	// X neighbors
-	if n, _ = NeighborX(a, ND_POSITIVE); CoordEqual(n, b) {
+	if n, _ = NeighborX(a, ND_POSITIVE); n.Equal(b) {
 		return true
 	}
-	if n, _ = NeighborX(a, ND_NEGATIVE); CoordEqual(n, b) {
+	if n, _ = NeighborX(a, ND_NEGATIVE); n.Equal(b) {
 		return true
 	}
 
 	// Y neighbors
-	if n, _ = NeighborY(a, ND_POSITIVE); CoordEqual(n, b) {
+	if n, _ = NeighborY(a, ND_POSITIVE); n.Equal(b) {
 		return true
 	}
-	if n, _ = NeighborY(a, ND_NEGATIVE); CoordEqual(n, b) {
+	if n, _ = NeighborY(a, ND_NEGATIVE); n.Equal(b) {
 		return true
 	}
 
 	// Z neighbors
-	if n, _ = NeighborZ(a, ND_POSITIVE); CoordEqual(n, b) {
+	if n, _ = NeighborZ(a, ND_POSITIVE); n.Equal(b) {
 		return true
 	}
-	if n, _ = NeighborZ(a, ND_NEGATIVE); CoordEqual(n, b) {
+	if n, _ = NeighborZ(a, ND_NEGATIVE); n.Equal(b) {
 		return true
 	}
 

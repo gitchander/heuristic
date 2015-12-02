@@ -5,6 +5,16 @@ import (
 	"fmt"
 )
 
+/*
+type ErrorCoord struct {
+	message string
+}
+
+func (e ErrorCoord) Error() string {
+	return e.message
+}
+*/
+
 func newError(m string) error {
 	return errors.New(fmt.Sprintf("hexm: %s", m))
 }

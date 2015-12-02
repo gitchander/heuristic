@@ -1,114 +1,61 @@
 package hexm
 
-/*
-
-//-----------------------
-matrix size = 3 x 3 x 3
-coord= (x, y, z)
-//-----------------------
-
-				(0,2,0)
-
-		(0,2,1)			(1,2,0)
-
-(0,2,2)			(0,1,0)			(2,2,0)
-
-		(0,1,1)			(1,1,0)
-
-(0,1,2)			(0,0,0)			(2,1,0)
-
-		(0,0,1)			(1,0,0)
-
-(0,0,2)			(1,0,1)			(2,0,0)
-
-		(1,0,2)			(2,0,1)
-
-				(2,0,2)
-
-//-----------------------
-
-*/
-
-type Matrix interface {
-	SetCell(c Coord, cell interface{}) (err error)
-	GetCell(c Coord) (cell interface{}, err error)
-	NewIterator() Iterator
-}
-
-type privMatrix struct {
-	size    Size
-	cells   []interface{}
+type Matrix struct {
+	s       Size
+	vs      []interface{}
 	indexXY int
 	indexYZ int
 	indexZX int
 }
 
-func NewMatrix(s Size) Matrix {
+func NewMatrix(s Size) (*Matrix, error) {
 
-	if s == nil {
-		return nil
+	if err := s.getError(); err != nil {
+		return nil, err
 	}
 
-	sizeX, sizeY, sizeZ := s.GetSize()
+	var (
+		sizeXY = s.Dx * (s.Dy - 1)
+		sizeYZ = s.Dy * (s.Dz - 1)
+		sizeZX = s.Dz * (s.Dx - 1)
 
-	var size_xy = sizeX * (sizeY - 1)
-	var size_yz = sizeY * (sizeZ - 1)
-	var size_zx = sizeZ * (sizeX - 1)
+		sizeXYZ = 1 + sizeXY + sizeYZ + sizeZX
 
-	var size_xyz = 1 + size_xy + size_yz + size_zx
+		indexXY = 1
+		indexYZ = indexXY + sizeXY
+		indexZX = indexYZ + sizeYZ
+	)
 
-	var index_xy = 1
-	var index_yz = index_xy + size_xy
-	var index_zx = index_yz + size_yz
-
-	return &privMatrix{
-		size:    s,
-		cells:   make([]interface{}, size_xyz),
-		indexXY: index_xy,
-		indexYZ: index_yz,
-		indexZX: index_zx,
-	}
+	return &Matrix{
+		s:       s,
+		vs:      make([]interface{}, sizeXYZ),
+		indexXY: indexXY,
+		indexYZ: indexYZ,
+		indexZX: indexZX,
+	}, nil
 }
 
-func (this *privMatrix) GetSize() Size {
-
-	if this == nil {
-		return nil
-	}
-
-	return this.size
+func (m *Matrix) Size() Size {
+	return m.s
 }
 
-func (this *privMatrix) IsEmpty() bool {
+func (m *Matrix) coordToIndex(c Coord) (index int, err error) {
 
-	if this == nil {
-		return true
-	}
-
-	return this.IsEmpty()
-}
-
-func (this *privMatrix) coordToIndex(c Coord) (index int, err error) {
-
-	x, y, z := c.GetCoord()
-
-	if !this.size.Сontained(c) {
+	if !m.s.Сontained(c) {
 		err = ErrorSizeOutOfRange
 		return
 	}
 
-	sizeX, sizeY, sizeZ := this.size.GetSize()
-
 	switch {
 
-	case (x == 0 && z > 0): // matrix yz
-		index = this.indexYZ + ((z-1)*sizeY + y)
+	case (c.X == 0 && c.Z > 0): // matrix yz
+		index = m.indexYZ + ((c.Z-1)*m.s.Dy + c.Y)
 
-	case (y == 0 && x > 0): // matrix zx
-		index = this.indexZX + ((x-1)*sizeZ + z)
+	case (c.Y == 0 && c.X > 0): // matrix zx
+		index = m.indexZX + ((c.X-1)*m.s.Dz + c.Z)
 
-	case (z == 0 && y > 0): // matrix xy
-		index = this.indexXY + ((y-1)*sizeX + x)
+	case (c.Z == 0 && c.Y > 0): // matrix xy
+		index = m.indexXY + ((c.Y-1)*m.s.Dx + c.X)
 
 	default:
 		index = 0
@@ -117,36 +64,45 @@ func (this *privMatrix) coordToIndex(c Coord) (index int, err error) {
 	return
 }
 
-func (this *privMatrix) indexToCoord(index int) (Coord, error) {
+// quo = x / y
+// rem = x % y
+func quoRem(x, y int) (quo, rem int) {
 
-	if !this.indexIsValid(index) {
-		err := ErrorIndexIsNotValit
-		return nil, err
+	quo = x / y
+	rem = x - quo*y
+
+	return
+}
+
+func (m *Matrix) indexToCoord(index int) (c Coord, err error) {
+
+	if !m.indexIsValid(index) {
+		err = ErrorIndexIsNotValit
+		return
 	}
 
 	var x, y, z int
-	sizeX, sizeY, sizeZ := this.size.GetSize()
 
 	switch {
 
-	case (index >= this.indexZX): // matrix zx
+	case (index >= m.indexZX): // matrix zx
 		{
 			y = 0
-			x, z = quoRem(index-this.indexZX, sizeZ)
+			x, z = quoRem(index-m.indexZX, m.s.Dz)
 			x++
 		}
 
-	case (index >= this.indexYZ): // matrix yz
+	case (index >= m.indexYZ): // matrix yz
 		{
 			x = 0
-			z, y = quoRem(index-this.indexYZ, sizeY)
+			z, y = quoRem(index-m.indexYZ, m.s.Dy)
 			z++
 		}
 
-	case (index >= this.indexXY): // matrix xy
+	case (index >= m.indexXY): // matrix xy
 		{
 			z = 0
-			y, x = quoRem(index-this.indexXY, sizeX)
+			y, x = quoRem(index-m.indexXY, m.s.Dx)
 			y++
 		}
 
@@ -154,46 +110,46 @@ func (this *privMatrix) indexToCoord(index int) (Coord, error) {
 		x, y, z = 0, 0, 0
 	}
 
-	return NewCoord(x, y, z)
-}
-
-func (this *privMatrix) indexIsValid(index int) bool {
-	return (index >= 0) && (index < len(this.cells))
-}
-
-func (this *privMatrix) SetCell(c Coord, cell interface{}) (err error) {
-
-	var index int
-	if index, err = this.coordToIndex(c); err != nil {
-		return
-	}
-
-	this.cells[index] = cell
+	c.set_XYZ(x, y, z)
+	err = c.getError()
 
 	return
 }
 
-func (this *privMatrix) GetCell(c Coord) (cell interface{}, err error) {
-
-	var index int
-	if index, err = this.coordToIndex(c); err != nil {
-		return
-	}
-
-	cell = this.cells[index]
-
-	return
+func (m *Matrix) indexIsValid(index int) bool {
+	return (index >= 0) && (index < len(m.vs))
 }
 
-func (this *privMatrix) NewIterator() Iterator {
+func (m *Matrix) Set(c Coord, v interface{}) error {
 
-	if this == nil {
-		return nil
+	err := c.getError()
+	if err != nil {
+		return err
 	}
 
-	return &privIterator{
-		index:        0,
-		cells:        this.cells,
-		indexToCoord: this.indexToCoord,
+	index, err := m.coordToIndex(c)
+	if err != nil {
+		return err
 	}
+
+	m.vs[index] = v
+
+	return nil
+}
+
+func (m *Matrix) Get(c Coord) (interface{}, error) {
+
+	err := c.getError()
+	if err != nil {
+		return nil, err
+	}
+
+	index, err := m.coordToIndex(c)
+	if err != nil {
+		return nil, err
+	}
+
+	v := m.vs[index]
+
+	return v, nil
 }

@@ -11,16 +11,14 @@ func newRand() *rand.Rand {
 	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func intGivenRange(r *rand.Rand, min, max int) int {
-
+func randIntRange(r *rand.Rand, min, max int) int {
 	if min > max {
 		min, max = max, min
 	}
-	n := max - min + 1
-	return min + r.Intn(n)
+	return min + r.Intn(max-min)
 }
 
-func randomCoord(r *rand.Rand, min, max int) (Coord, error) {
+func randomCoord(r *rand.Rand, min, max int) Coord {
 
 	var x, y, z int
 
@@ -29,42 +27,45 @@ func randomCoord(r *rand.Rand, min, max int) (Coord, error) {
 	case 0:
 		{
 			x = 0
-			y = intGivenRange(r, min, max)
-			z = intGivenRange(r, min, max)
+			y = randIntRange(r, min, max)
+			z = randIntRange(r, min, max)
 		}
 
 	case 1:
 		{
-			x = intGivenRange(r, min, max)
+			x = randIntRange(r, min, max)
 			y = 0
-			z = intGivenRange(r, min, max)
+			z = randIntRange(r, min, max)
 		}
 
 	case 2:
 		{
-			x = intGivenRange(r, min, max)
-			y = intGivenRange(r, min, max)
+			x = randIntRange(r, min, max)
+			y = randIntRange(r, min, max)
 			z = 0
 		}
 	}
 
-	return NewCoord(x, y, z)
+	return Coord{x, y, z}
 }
 
-func neighborAxis(c Coord, axis int, nd NeighborDir) (Coord, error) {
+func neighborAxis(c Coord, axis int, nd NeighborDir) (n Coord, err error) {
 
 	switch axis {
 	case 0:
-		return NeighborX(c, nd)
+		n, err = NeighborX(c, nd)
 
 	case 1:
-		return NeighborY(c, nd)
+		n, err = NeighborY(c, nd)
 
 	case 2:
-		return NeighborZ(c, nd)
+		n, err = NeighborZ(c, nd)
+
+	default:
+		err = errors.New("Wrong neighbor axis")
 	}
 
-	return nil, errors.New("Wrong neighbor axis")
+	return
 }
 
 func TestCoordNeighbors(t *testing.T) {
@@ -79,11 +80,7 @@ func TestCoordNeighbors(t *testing.T) {
 
 		axis := r.Intn(3)
 
-		a, err = randomCoord(r, 0, 10000)
-		if err != nil {
-			t.Error(err)
-			return
-		}
+		a = randomCoord(r, 0, 10000)
 
 		b, err = neighborAxis(a, axis, ND_NEGATIVE)
 		if err != nil {
@@ -97,7 +94,7 @@ func TestCoordNeighbors(t *testing.T) {
 			return
 		}
 
-		if !CoordEqual(a, c) {
+		if !a.Equal(c) {
 			t.Error(errors.New("not equal"))
 			return
 		}
@@ -114,20 +111,16 @@ func TestCoordToVector(t *testing.T) {
 	r := newRand()
 	for i := 0; i < 1000000; i++ {
 
-		a, err = randomCoord(r, 0, 10000)
-		if err != nil {
-			t.Error(err)
-			return
-		}
+		a = randomCoord(r, 0, 10000)
 
-		v := CoordToVector(a)
+		v, _ := CoordToVector(a)
 		b, err = VectorToCoord(v)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		if !CoordEqual(a, b) {
+		if !a.Equal(b) {
 			t.Error(errors.New("not equal"))
 			return
 		}

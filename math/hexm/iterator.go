@@ -1,49 +1,49 @@
 package hexm
 
-type Iterator interface {
-	Done() bool
-	Current() (c Coord, v interface{}, err error)
-	SetCurrent(v interface{}) error
-	Next()
+type Iterator struct {
+	i int
+	m *Matrix
 }
 
-type privIterator struct {
-	index        int
-	cells        []interface{}
-	indexToCoord func(index int) (Coord, error)
+func NewIterator(m *Matrix) *Iterator {
+	return &Iterator{0, m}
 }
 
-func (this *privIterator) Done() bool {
-	return this.index >= len(this.cells)
+func (p *Iterator) Done() bool {
+	return (p.i >= len(p.m.vs))
 }
 
-func (this *privIterator) Current() (c Coord, v interface{}, err error) {
+func (p *Iterator) Current() (c Coord, v interface{}, err error) {
 
-	if this.index >= len(this.cells) {
+	vs := p.m.vs
+
+	if p.i >= len(vs) {
 		err = ErrorIteratorIndexOut
 		return
 	}
 
-	if c, err = this.indexToCoord(this.index); err != nil {
+	if c, err = p.m.indexToCoord(p.i); err != nil {
 		return
 	}
 
-	v = this.cells[this.index]
+	v = vs[p.i]
 
 	return
 }
 
-func (this *privIterator) SetCurrent(v interface{}) error {
+func (p *Iterator) SetCurrent(v interface{}) error {
 
-	if this.index >= len(this.cells) {
+	vs := p.m.vs
+
+	if p.i >= len(vs) {
 		return ErrorIteratorIndexOut
 	}
 
-	this.cells[this.index] = v
+	vs[p.i] = v
 
 	return nil
 }
 
-func (this *privIterator) Next() {
-	this.index++
+func (p *Iterator) Next() {
+	p.i++
 }
