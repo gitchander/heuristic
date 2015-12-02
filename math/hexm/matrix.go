@@ -77,7 +77,7 @@ func quoRem(x, y int) (quo, rem int) {
 func (m *Matrix) indexToCoord(index int) (c Coord, err error) {
 
 	if !m.indexIsValid(index) {
-		err = ErrorIndexIsNotValit
+		err = ErrorIndexIsNotValid
 		return
 	}
 

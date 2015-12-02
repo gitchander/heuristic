@@ -29,7 +29,7 @@ var (
 	ErrorCoordOneZeroParameter  = newErrorCoord("At least one parameter must be zero")
 	ErrorSizeOutOfRange         = newError("Size out of range")
 	ErrorSizeZeroParameter      = newError("Parameters can not be negative or zero")
-	ErrorIndexIsNotValit        = newError("Index is not valid")
+	ErrorIndexIsNotValid        = newError("Index is not valid")
 	ErrorIteratorIndexOut       = newError("Iterator index out")
 	ErrorVectorToCoord          = newError("Vector to coord")
 )
