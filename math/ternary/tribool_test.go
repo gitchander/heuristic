@@ -2,14 +2,14 @@ package ternary
 
 import "testing"
 
-const anyOther Trilean = 100 // -> Unknown
+const anyOther Bool = 100 // -> Unknown
 
 type unaryOperatorSample struct {
-	a, b Trilean // b= a.operator()
+	a, b Bool // b= a.operator()
 }
 
 type binaryOperatorSample struct {
-	a, b, c Trilean // c= a.operator(b)
+	a, b, c Bool // c= a.operator(b)
 }
 
 var not_Samples = []unaryOperatorSample{
@@ -91,7 +91,7 @@ var xor_Samples = []binaryOperatorSample{
 
 func TestTriBool(t *testing.T) {
 
-	var a, b, c Trilean
+	var a, b, c Bool
 
 	for _, s := range not_Samples {
 

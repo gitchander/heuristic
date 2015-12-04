@@ -1,11 +1,9 @@
 package ternary
 
-// Trilean, TriBool
-
-type Trilean int
+type Bool int
 
 const (
-	Unknown Trilean = iota
+	Unknown Bool = iota
 	True
 	False
 )
@@ -17,13 +15,13 @@ const (
 )
 
 var (
-	key_Trilean = map[Trilean]string{
+	key_Bool = map[Bool]string{
 		Unknown: strUnknown,
 		True:    strTrue,
 		False:   strFalse,
 	}
 
-	val_Trilean = map[string]Trilean{
+	val_Bool = map[string]Bool{
 		strUnknown: Unknown,
 		strTrue:    True,
 		strFalse:   False,
@@ -37,7 +35,7 @@ var (
 //    T | T T T |
 //    U | U T U |
 //---------------
-func (a Trilean) Or(b Trilean) (c Trilean) {
+func (a Bool) Or(b Bool) (c Bool) {
 
 	switch {
 	case (a == True) || (b == True):
@@ -57,7 +55,7 @@ func (a Trilean) Or(b Trilean) (c Trilean) {
 //    T | F T U |
 //    U | F U U |
 //---------------
-func (a Trilean) And(b Trilean) (c Trilean) {
+func (a Bool) And(b Bool) (c Bool) {
 
 	switch {
 	case (a == False) || (b == False):
@@ -77,7 +75,7 @@ func (a Trilean) And(b Trilean) (c Trilean) {
 //    T | T F U |
 //    U | U U U |
 //---------------
-func (a Trilean) Xor(b Trilean) (c Trilean) {
+func (a Bool) Xor(b Bool) (c Bool) {
 
 	switch a {
 	case True:
@@ -104,7 +102,7 @@ func (a Trilean) Xor(b Trilean) (c Trilean) {
 	return
 }
 
-func (a Trilean) Not() (b Trilean) {
+func (a Bool) Not() (b Bool) {
 
 	switch a {
 	case False:
@@ -116,20 +114,25 @@ func (a Trilean) Not() (b Trilean) {
 	return
 }
 
-func (a Trilean) String() string {
+func (a Bool) String() string {
 
-	s, ok := key_Trilean[a]
+	s, ok := key_Bool[a]
 	if !ok {
 		s = strUnknown
 	}
 	return s
 }
 
-func (a *Trilean) Parse(s string) bool {
+func (a *Bool) Parse(s string) bool {
 
-	v, ok := val_Trilean[s]
+	v, ok := val_Bool[s]
 	if ok {
 		*a = v
 	}
 	return ok
+}
+
+func StringToBool(s string) Bool {
+	b := val_Bool[s]
+	return b
 }

@@ -3,22 +3,22 @@ package main
 import (
 	"fmt"
 
-	. "github.com/gitchander/heuristic/math/ternary"
+	"github.com/gitchander/heuristic/math/ternary"
 )
 
 func TriBoolUse() {
 
-	var a Trilean
+	var a ternary.Bool
 
-	if a == True {
+	if a == ternary.True {
 		fmt.Println("\t true")
-	} else if a == False {
+	} else if a == ternary.False {
 		fmt.Println("\t false")
 	} else {
 		fmt.Println("\t unknown")
 	}
 
-	if a == Unknown {
+	if a == ternary.Unknown {
 		fmt.Println("\t unknown")
 	} else {
 		fmt.Println("\t not unknown")
@@ -27,14 +27,14 @@ func TriBoolUse() {
 
 func TriBoolExample() {
 
-	var a, b Trilean
+	var a, b ternary.Bool
 
 	if a.Parse("True") {
 		fmt.Println(a)
 	}
 
-	a = False
-	b = True
+	a = ternary.False
+	b = ternary.True
 
 	c := a.Or(b.Not())
 
@@ -46,9 +46,9 @@ func TriBoolExample() {
 
 func ExampleTryte() {
 
-	a := NewTryte(-15)
-	b := NewTryte(-7)
-	c := new(Tryte)
+	a := ternary.NewTryte(-15)
+	b := ternary.NewTryte(-7)
+	c := new(ternary.Tryte)
 
 	c.Mul(a, b)
 
