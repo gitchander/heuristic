@@ -35,7 +35,10 @@ type DrawFunc func(*cairo.Canvas) error
 
 func makeImages(im InfoMakePNG) error {
 
-	surface := cairo.NewSurface(cairo.FORMAT_ARGB32, 512, 512)
+	surface, err := cairo.NewSurface(cairo.FORMAT_ARGB32, 512, 512)
+	if err != nil {
+		return err
+	}
 	defer surface.Destroy()
 
 	canvas, err := cairo.NewCanvas(surface)
