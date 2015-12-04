@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -26,10 +27,16 @@ func main() {
 		return
 	}
 
-	surface := cairo.NewSurface(cairo.FORMAT_ARGB32, width, height)
+	surface, err := cairo.NewSurface(cairo.FORMAT_ARGB32, width, height)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	defer surface.Destroy()
 
-	canvas, _ := cairo.NewCanvas(surface)
+	canvas, err := cairo.NewCanvas(surface)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	defer canvas.Destroy()
 
 	canvas.SetSourceRGB(1, 1, 1)
