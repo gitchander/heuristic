@@ -1,39 +1,35 @@
 package hashxy
 
-import "container/list"
+import (
+	"container/list"
+	"errors"
+)
 
-type Matrix interface {
-	Set(p Point, newValue interface{}) (oldValue interface{})
-	Get(p Point) interface{}
-	Remove(p Point) interface{}
-	NewIterator() Iterator
-}
-
-type matrix struct {
+type Matrix struct {
 	width  int
 	height int
 	lists  []list.List
 }
 
-func NewMatrix(Width, Height int) Matrix {
+func NewMatrix(Width, Height int) (*Matrix, error) {
 
 	if (Width <= 0) || (Height <= 0) {
-		return nil
+		return nil, errors.New("value Width or Height <= 0")
 	}
 
-	return &matrix{
+	return &Matrix{
 		width:  Width,
 		height: Height,
 		lists:  make([]list.List, Width*Height),
-	}
+	}, nil
 }
 
-func (this *matrix) getList(p Point) *list.List {
+func (m *Matrix) getList(p Point) *list.List {
 
-	x := mod(p.X, this.width)
-	y := mod(p.Y, this.height)
+	x := mod(p.X, m.width)
+	y := mod(p.Y, m.height)
 
-	return &(this.lists[y*this.width+x])
+	return &(m.lists[y*m.width+x])
 }
 
 func findElement(list *list.List, p Point) *list.Element {
@@ -49,9 +45,9 @@ func findElement(list *list.List, p Point) *list.Element {
 	return nil
 }
 
-func (this *matrix) Set(p Point, newValue interface{}) (oldValue interface{}) {
+func (m *Matrix) Set(p Point, newValue interface{}) (oldValue interface{}) {
 
-	list := this.getList(p)
+	list := m.getList(p)
 	if e := findElement(list, p); e != nil {
 		if pv := e.Value.(*pointValue); pv != nil {
 			oldValue = pv.Value
@@ -68,9 +64,9 @@ func (this *matrix) Set(p Point, newValue interface{}) (oldValue interface{}) {
 	return
 }
 
-func (this *matrix) Get(p Point) interface{} {
+func (m *Matrix) Get(p Point) interface{} {
 
-	list := this.getList(p)
+	list := m.getList(p)
 	if e := findElement(list, p); e != nil {
 		if pv := e.Value.(*pointValue); pv != nil {
 			return pv.Value
@@ -80,9 +76,9 @@ func (this *matrix) Get(p Point) interface{} {
 	return nil
 }
 
-func (this *matrix) Remove(p Point) interface{} {
+func (m *Matrix) Remove(p Point) interface{} {
 
-	list := this.getList(p)
+	list := m.getList(p)
 	if e := findElement(list, p); e != nil {
 		pv := e.Value.(*pointValue)
 		list.Remove(e)
@@ -92,8 +88,4 @@ func (this *matrix) Remove(p Point) interface{} {
 	}
 
 	return nil
-}
-
-func (this *matrix) NewIterator() Iterator {
-	return newIterator(this.lists)
 }

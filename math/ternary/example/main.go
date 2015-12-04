@@ -8,17 +8,17 @@ import (
 
 func TriBoolUse() {
 
-	var a TriBool
+	var a Trilean
 
-	if a.IsTrue() {
+	if a == True {
 		fmt.Println("\t true")
-	} else if a.IsFalse() {
+	} else if a == False {
 		fmt.Println("\t false")
 	} else {
 		fmt.Println("\t unknown")
 	}
 
-	if a.IsUnknown() {
+	if a == Unknown {
 		fmt.Println("\t unknown")
 	} else {
 		fmt.Println("\t not unknown")
@@ -27,14 +27,14 @@ func TriBoolUse() {
 
 func TriBoolExample() {
 
-	var a, b TriBool
+	var a, b Trilean
 
 	if a.Parse("True") {
 		fmt.Println(a)
 	}
 
-	a.SetFalse()
-	b.SetTrue()
+	a = False
+	b = True
 
 	c := a.Or(b.Not())
 

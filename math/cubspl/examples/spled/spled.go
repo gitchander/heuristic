@@ -197,10 +197,9 @@ func (this *SplineEditor) DrawCairoNative(ptr uintptr) {
 }
 
 func (this *SplineEditor) Name() string {
-	return "SplineEditor"
+	return "Cubic Spline"
 }
 
-//-------------------------------------------------------------------
 func drawBorder(c *cairo.Canvas, r *Rectangle) {
 
 	c.SetSourceRGBA(0, 0, 0, 0.3)

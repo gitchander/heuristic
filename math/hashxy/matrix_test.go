@@ -7,7 +7,7 @@ import (
 func TestMatrixFill(t *testing.T) {
 
 	nx, ny := 19, 17
-	m := NewMatrix(nx, ny)
+	m, _ := NewMatrix(nx, ny)
 
 	for y := 0; y < ny; y++ {
 		for x := 0; x < nx; x++ {
@@ -18,8 +18,7 @@ func TestMatrixFill(t *testing.T) {
 		}
 	}
 
-	M := m.(*matrix)
-	for _, list := range M.lists {
+	for _, list := range m.lists {
 		n := list.Len()
 		if n != 4 {
 			t.Error("list wrong len")

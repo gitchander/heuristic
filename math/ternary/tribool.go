@@ -1,11 +1,13 @@
 package ternary
 
-type privTriBool int
+// Trilean, TriBool
+
+type Trilean int
 
 const (
-	privUnknown privTriBool = iota // default value
-	privTrue
-	privFalse
+	Unknown Trilean = iota
+	True
+	False
 )
 
 const (
@@ -15,55 +17,18 @@ const (
 )
 
 var (
-	key_TriBool = map[privTriBool]string{
-		privUnknown: strUnknown,
-		privTrue:    strTrue,
-		privFalse:   strFalse,
+	key_Trilean = map[Trilean]string{
+		Unknown: strUnknown,
+		True:    strTrue,
+		False:   strFalse,
 	}
 
-	val_TriBool = map[string]privTriBool{
-		strUnknown: privUnknown,
-		strTrue:    privTrue,
-		strFalse:   privFalse,
+	val_Trilean = map[string]Trilean{
+		strUnknown: Unknown,
+		strTrue:    True,
+		strFalse:   False,
 	}
 )
-
-// other synonym Trilean
-type TriBool struct {
-	v privTriBool // hide operators '==' and '='
-}
-
-func (a *TriBool) SetTrue() *TriBool {
-	a.v = privTrue
-	return a
-}
-
-func (a *TriBool) SetFalse() *TriBool {
-	a.v = privFalse
-	return a
-}
-
-func (a *TriBool) SetUnknown() *TriBool {
-	a.v = privUnknown
-	return a
-}
-
-func (a TriBool) IsTrue() bool {
-	return (a.v == privTrue)
-}
-
-func (a TriBool) IsFalse() bool {
-	return (a.v == privFalse)
-}
-
-func (a TriBool) IsUnknown() bool {
-	return (a.v == privUnknown)
-}
-
-func (a TriBool) Equal(b TriBool) bool {
-
-	return (a.v == b.v)
-}
 
 //---------------
 //   Or | F T U |
@@ -72,14 +37,14 @@ func (a TriBool) Equal(b TriBool) bool {
 //    T | T T T |
 //    U | U T U |
 //---------------
-func (a TriBool) Or(b TriBool) (c TriBool) {
+func (a Trilean) Or(b Trilean) (c Trilean) {
 
 	switch {
-	case (a.v == privTrue) || (b.v == privTrue):
-		c.v = privTrue
+	case (a == True) || (b == True):
+		c = True
 
-	case (a.v == privFalse) && (b.v == privFalse):
-		c.v = privFalse
+	case (a == False) && (b == False):
+		c = False
 	}
 
 	return
@@ -92,14 +57,14 @@ func (a TriBool) Or(b TriBool) (c TriBool) {
 //    T | F T U |
 //    U | F U U |
 //---------------
-func (a TriBool) And(b TriBool) (c TriBool) {
+func (a Trilean) And(b Trilean) (c Trilean) {
 
 	switch {
-	case (a.v == privFalse) || (b.v == privFalse):
-		c.v = privFalse
+	case (a == False) || (b == False):
+		c = False
 
-	case (a.v == privTrue) && (b.v == privTrue):
-		c.v = privTrue
+	case (a == True) && (b == True):
+		c = True
 	}
 
 	return
@@ -112,26 +77,26 @@ func (a TriBool) And(b TriBool) (c TriBool) {
 //    T | T F U |
 //    U | U U U |
 //---------------
-func (a TriBool) Xor(b TriBool) (c TriBool) {
+func (a Trilean) Xor(b Trilean) (c Trilean) {
 
-	switch a.v {
-	case privTrue:
+	switch a {
+	case True:
 		{
-			switch b.v {
-			case privTrue:
-				c.v = privFalse
-			case privFalse:
-				c.v = privTrue
+			switch b {
+			case True:
+				c = False
+			case False:
+				c = True
 			}
 		}
 
-	case privFalse:
+	case False:
 		{
-			switch b.v {
-			case privTrue:
-				c.v = privTrue
-			case privFalse:
-				c.v = privFalse
+			switch b {
+			case True:
+				c = True
+			case False:
+				c = False
 			}
 		}
 	}
@@ -139,32 +104,32 @@ func (a TriBool) Xor(b TriBool) (c TriBool) {
 	return
 }
 
-func (a TriBool) Not() (b TriBool) {
+func (a Trilean) Not() (b Trilean) {
 
-	switch a.v {
-	case privFalse:
-		b.v = privTrue
-	case privTrue:
-		b.v = privFalse
+	switch a {
+	case False:
+		b = True
+	case True:
+		b = False
 	}
 
 	return
 }
 
-func (a TriBool) String() string {
+func (a Trilean) String() string {
 
-	s, ok := key_TriBool[a.v]
+	s, ok := key_Trilean[a]
 	if !ok {
 		s = strUnknown
 	}
 	return s
 }
 
-func (a *TriBool) Parse(s string) bool {
+func (a *Trilean) Parse(s string) bool {
 
-	v, ok := val_TriBool[s]
+	v, ok := val_Trilean[s]
 	if ok {
-		a.v = v
+		*a = v
 	}
 	return ok
 }

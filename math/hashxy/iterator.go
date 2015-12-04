@@ -2,41 +2,38 @@ package hashxy
 
 import "container/list"
 
-type Iterator interface {
-	Done() bool
-	Next()
-	Current() (p Point, v interface{})
-	SetCurrent(v interface{})
-}
-
-type iterator struct {
+type Iterator struct {
 	index   int
 	lists   []list.List
 	element *list.Element
 }
 
-func newIterator(ls []list.List) (I *iterator) {
+func NewIterator(m *Matrix) *Iterator {
+	return newIterator(m.lists)
+}
 
-	I = &iterator{lists: ls}
+func newIterator(ls []list.List) *Iterator {
+
+	it := &Iterator{lists: ls}
 
 	for i, list := range ls {
 		if e := list.Front(); e != nil {
-			I.index = i
-			I.element = e
+			it.index = i
+			it.element = e
 			break
 		}
 	}
 
-	return I
+	return it
 }
 
-func (this *iterator) Current() (p Point, v interface{}) {
+func (it *Iterator) Current() (p Point, v interface{}) {
 
-	if this.element == nil {
+	if it.element == nil {
 		return
 	}
 
-	pv, ok := this.element.Value.(*pointValue)
+	pv, ok := it.element.Value.(*pointValue)
 	if !ok {
 		return
 	}
@@ -47,13 +44,13 @@ func (this *iterator) Current() (p Point, v interface{}) {
 	return
 }
 
-func (this *iterator) SetCurrent(v interface{}) {
+func (it *Iterator) SetCurrent(v interface{}) {
 
-	if this.element == nil {
+	if it.element == nil {
 		return
 	}
 
-	pv, ok := this.element.Value.(*pointValue)
+	pv, ok := it.element.Value.(*pointValue)
 	if !ok {
 		return
 	}
@@ -63,27 +60,27 @@ func (this *iterator) SetCurrent(v interface{}) {
 	}
 }
 
-func (this *iterator) Next() {
+func (it *Iterator) Next() {
 
-	if this.element == nil {
+	if it.element == nil {
 		return
 	}
 
-	this.element = this.element.Next()
-	if this.element != nil {
+	it.element = it.element.Next()
+	if it.element != nil {
 		return
 	}
 
-	ls := this.lists
-	for i := this.index + 1; i < len(ls); i++ {
+	ls := it.lists
+	for i := it.index + 1; i < len(ls); i++ {
 		if e := ls[i].Front(); e != nil {
-			this.element = e
-			this.index = i
+			it.element = e
+			it.index = i
 			break
 		}
 	}
 }
 
-func (this *iterator) Done() bool {
-	return (this.element == nil)
+func (it *Iterator) Done() bool {
+	return (it.element == nil)
 }

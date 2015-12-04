@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -23,24 +24,18 @@ func randPoint(r *rand.Rand) hashxy.Point {
 
 func main() {
 
-	m := hashxy.NewMatrix(11, 13)
+	m, err := hashxy.NewMatrix(11, 13)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	r := newRand()
 	for i := 0; i < 100; i++ {
 		m.Set(randPoint(r), r.Intn(1000))
 	}
 
-	/*
-		v := hm.GetCell(p)
-
-		k, ok := v.(int)
-		if ok {
-			fmt.Println(k)
-		}
-	*/
-
 	count := 0
-	for I := m.NewIterator(); !I.Done(); I.Next() {
+	for I := hashxy.NewIterator(m); !I.Done(); I.Next() {
 
 		p, v := I.Current()
 		if k, ok := v.(int); ok {
@@ -51,7 +46,7 @@ func main() {
 	fmt.Println(count)
 
 	count = 0
-	for I := m.NewIterator(); !I.Done(); I.Next() {
+	for I := hashxy.NewIterator(m); !I.Done(); I.Next() {
 		count++
 	}
 	fmt.Println(count)
