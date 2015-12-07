@@ -1,6 +1,10 @@
-package ternary
+package tri
 
 type Bool int
+
+// Synonyms:
+//		Tribool
+//		Trilean
 
 const (
 	Unknown Bool = iota
@@ -123,6 +127,7 @@ func (a Bool) String() string {
 	return s
 }
 
+/*
 func (a *Bool) Parse(s string) bool {
 
 	v, ok := val_Bool[s]
@@ -131,6 +136,7 @@ func (a *Bool) Parse(s string) bool {
 	}
 	return ok
 }
+*/
 
 func StringToBool(s string) Bool {
 	b := val_Bool[s]

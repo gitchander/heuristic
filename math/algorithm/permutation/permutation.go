@@ -12,6 +12,10 @@ type permutation struct {
 
 func New(v interface{}) (*permutation, error) {
 
+	if v == nil {
+		return nil, errors.New("permutation: argument is nil")
+	}
+
 	rv := reflect.ValueOf(v)
 
 	if t := rv.Type(); t.Kind() != reflect.Slice {
@@ -66,18 +70,23 @@ func swap(v1, v2 reflect.Value) {
 	v2.Set(reflect.ValueOf(i1))
 }
 
+var ErrorTraceBreak = errors.New("permutation: ErrorTraceBreak")
+
 func Trace(v interface{}, fn func(v interface{}) bool) error {
+
 	p, err := New(v)
 	if err != nil {
 		return err
 	}
-	for {
+
+	if !fn(v) {
+		return ErrorTraceBreak
+	}
+	for p.Next() {
 		if !fn(v) {
-			break
-		}
-		if !p.Next() {
-			break
+			return ErrorTraceBreak
 		}
 	}
+
 	return nil
 }

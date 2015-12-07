@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gitchander/heuristic/math/cubspl"
@@ -20,8 +19,7 @@ func main() {
 
 	se, err := NewSplineEditor(r)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatal(err.Error())
 	}
 	defer se.Close()
 

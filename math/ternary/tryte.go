@@ -49,19 +49,10 @@ func NewTryte(x int) *Tryte {
 	return new(Tryte).SetInt(x)
 }
 
-func (this *Tryte) сlone() *Tryte {
-
-	q := new(Tryte)
-
-	copy(q[:], this[:])
-
-	/*
-		for i := 0; i < count; i++ {
-			q[i] = this[i]
-		}
-	*/
-
-	return q
+func (t *Tryte) сlone() *Tryte {
+	c := new(Tryte)
+	copy(c[:], t[:])
+	return c
 }
 
 func (t *Tryte) String() string {
@@ -79,10 +70,10 @@ func (t *Tryte) String() string {
 	return buffer.String()
 }
 
-func divmod(a, b int) (quotient, remainder int) {
+func quoRem(a, b int) (quo, rem int) {
 
-	quotient = a / b
-	remainder = a - quotient*b
+	quo = a / b
+	rem = a - quo*b
 
 	return
 }
@@ -95,23 +86,23 @@ func (t *Tryte) SetZero() {
 
 func (t *Tryte) SetInt(v int) *Tryte {
 
-	var q, r int
+	var quo, rem int
 
 	switch {
 	case v > 0:
 
 		for i := 0; i < count; i++ {
-			q, r = divmod(v+max_digit, base)
-			t[i] = trit(r - max_digit)
-			v = q
+			quo, rem = quoRem(v+max_digit, base)
+			t[i] = trit(rem - max_digit)
+			v = quo
 		}
 
 	case v < 0:
 
 		for i := 0; i < count; i++ {
-			q, r = divmod(v-max_digit, base)
-			t[i] = trit(r + max_digit)
-			v = q
+			quo, rem = quoRem(v-max_digit, base)
+			t[i] = trit(rem + max_digit)
+			v = quo
 		}
 
 	default:

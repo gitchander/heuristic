@@ -1,4 +1,4 @@
-package ternary
+package tri
 
 import "testing"
 
@@ -89,7 +89,7 @@ var xor_Samples = []binaryOperatorSample{
 	{anyOther, anyOther, Unknown},
 }
 
-func TestTriBool(t *testing.T) {
+func TestBool(t *testing.T) {
 
 	var a, b, c Bool
 
