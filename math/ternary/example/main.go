@@ -6,18 +6,27 @@ import (
 	"github.com/gitchander/heuristic/math/ternary"
 )
 
-func ExampleTryte() {
+func main() {
+	ExampleSet()
+	ExampleMul()
+}
 
-	a := ternary.NewTryte(-15)
-	b := ternary.NewTryte(-7)
-	c := new(ternary.Tryte)
+func ExampleSet() {
+	x := ternary.NewTryte()
+	x.SetInt(-13)
+	fmt.Println(x)
+	fmt.Println()
+}
+
+func ExampleMul() {
+
+	a := ternary.NewTryteInt(250)
+	b := ternary.NewTryteInt(-7)
+	c := ternary.NewTryte()
 
 	c.Mul(a, b)
 
 	fmt.Println(c)
 	fmt.Println(c.Int())
-}
-
-func main() {
-	ExampleTryte()
+	fmt.Println()
 }

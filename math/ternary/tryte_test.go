@@ -11,17 +11,15 @@ func randomize() *rand.Rand {
 }
 
 func intGivenRange(r *rand.Rand, min, max int) int {
-
 	if min > max {
 		min, max = max, min
 	}
-	n := max - min + 1
-	return min + r.Intn(n)
+	return min + r.Intn(max-min)
 }
 
 func TestTryteSetGet(t *testing.T) {
 
-	a := new(Tryte)
+	a := NewTryte()
 
 	for i := MinValue; i <= MaxValue; i++ {
 
@@ -37,9 +35,9 @@ func TestTryteSetGet(t *testing.T) {
 
 func TestTryteMulSimple(t *testing.T) {
 
-	a := new(Tryte)
-	b := new(Tryte)
-	c := new(Tryte)
+	a := NewTryte()
+	b := NewTryte()
+	c := NewTryte()
 
 	for x := MinValue; x <= MaxValue; x++ {
 		for y := MinValue; y <= MaxValue; y++ {
@@ -65,16 +63,16 @@ func TestTryteMulSimple(t *testing.T) {
 
 func TestTryteMulRand(t *testing.T) {
 
-	a := new(Tryte)
-	b := new(Tryte)
-	c := new(Tryte)
+	a := NewTryte()
+	b := NewTryte()
+	c := NewTryte()
 
 	r := randomize()
 
 	for i := 0; i < 1000000; i++ {
 
-		x := intGivenRange(r, MinValue, MaxValue)
-		y := intGivenRange(r, MinValue, MaxValue)
+		x := intGivenRange(r, MinValue, MaxValue+1)
+		y := intGivenRange(r, MinValue, MaxValue+1)
 
 		mulXY := x * y
 

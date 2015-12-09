@@ -1,14 +1,15 @@
 package ternary
 
-import (
-	"bytes"
+import "bytes"
+
+const (
+	tritCount = 9
+	base      = 3
 )
 
 const (
-	count     = 9
-	base      = 3
-	min_digit = -(base - 1) / 2
-	max_digit = (base - 1) / 2
+	minDigit = -(base - 1) / 2
+	maxDigit = +(base - 1) / 2
 )
 
 const (
@@ -16,42 +17,32 @@ const (
 	MaxValue = +9841 // +(3^9−1)/2
 )
 
-//var digs = []rune{'-', '0', '+'}
+const prefix = "0t_"
 
-var digs = []rune{'N', '0', 'P'}
-
-/*
-	'\u25cf' - ●		-1
-	'\u25d2' - ◒		0
-	'\u25cb' - ○		+1
-
-var digs = []rune{'\u25cf', '\u25d2', '\u25cb'}
-*/
-
-type trit int8
-
-/*
-type ITryte interface {
-	SetInt(int) ITryte
-	GetInt() int
-	Add(x, y ITryte) ITryte
-	Sub(x, y ITryte) ITryte
-	Mul(x, y ITryte) ITryte
-	QuoRem(x, y, rem ITryte) (q ITryte, r ITryte)
-	String() string
-	Sign() int
-}
-*/
-
-type Tryte [count]trit
-
-func NewTryte(x int) *Tryte {
-	return new(Tryte).SetInt(x)
+var digitsSamples = [][]rune{
+	[]rune{'-', '0', '+'},
+	[]rune{'N', '0', 'P'},
+	[]rune{'N', 'Z', 'P'},
+	[]rune{'\u25cf', '\u25d2', '\u25cb'}, // []rune{ '●', '◒', '○' }
 }
 
-func (t *Tryte) сlone() *Tryte {
-	c := new(Tryte)
-	copy(c[:], t[:])
+var digs = digitsSamples[2]
+
+type Tryte struct {
+	trits []int8
+}
+
+func NewTryte() *Tryte {
+	return &Tryte{make([]int8, tritCount)}
+}
+
+func NewTryteInt(x int) *Tryte {
+	return NewTryte().SetInt(x)
+}
+
+func (t *Tryte) Clone() *Tryte {
+	c := NewTryte()
+	copy(c.trits, t.trits)
 	return c
 }
 
@@ -59,55 +50,37 @@ func (t *Tryte) String() string {
 
 	var buffer bytes.Buffer
 
-	index := t.indexMostSignificantDigit()
+	index := t.indexDigit()
 
-	//buffer.WriteString("0t")
+	buffer.WriteString(prefix)
 
 	for i := index; i >= 0; i-- {
-		buffer.WriteRune(digs[t[i]+1])
+		buffer.WriteRune(digs[t.trits[i]+maxDigit])
 	}
 
 	return buffer.String()
 }
 
-func quoRem(a, b int) (quo, rem int) {
-
-	quo = a / b
-	rem = a - quo*b
-
-	return
-}
-
-func (t *Tryte) SetZero() {
-	for i := 0; i < count; i++ {
-		t[i] = 0
-	}
-}
-
 func (t *Tryte) SetInt(v int) *Tryte {
 
-	var quo, rem int
+	ts := t.trits
 
-	switch {
-	case v > 0:
-
-		for i := 0; i < count; i++ {
-			quo, rem = quoRem(v+max_digit, base)
-			t[i] = trit(rem - max_digit)
+	if v > 0 {
+		for i := range ts {
+			quo, rem := quoRem(v+maxDigit, base)
+			ts[i] = int8(rem - maxDigit)
 			v = quo
 		}
-
-	case v < 0:
-
-		for i := 0; i < count; i++ {
-			quo, rem = quoRem(v-max_digit, base)
-			t[i] = trit(rem + max_digit)
+	} else if v < 0 {
+		for i := range ts {
+			quo, rem := quoRem(v-maxDigit, base)
+			ts[i] = int8(rem + maxDigit)
 			v = quo
 		}
-
-	default:
-
-		t.SetZero()
+	} else {
+		for i := range ts {
+			ts[i] = 0
+		}
 	}
 
 	return t
@@ -115,21 +88,23 @@ func (t *Tryte) SetInt(v int) *Tryte {
 
 func (t *Tryte) Int() int {
 
-	var v int = 0
-	var power int = 1
+	var (
+		v     = 0
+		power = 1
+	)
 
-	for i := 0; i < count; i++ {
-		v += power * int(t[i])
+	for _, trit := range t.trits {
+		v += power * int(trit)
 		power *= base
 	}
 
 	return v
 }
 
-func (t *Tryte) indexMostSignificantDigit() (index int) {
+func (t *Tryte) indexDigit() (index int) {
 
-	for i := 1; i < count; i++ {
-		if t[i] != 0 {
+	for i, trit := range t.trits {
+		if trit != 0 {
 			index = i
 		}
 	}
@@ -137,19 +112,19 @@ func (t *Tryte) indexMostSignificantDigit() (index int) {
 	return
 }
 
-// Sign returns:
+// Sign return:
 // 	-1 	if t < 0
 // 	 0	if t == 0
 // 	+1 	if t > 0
 func (t *Tryte) Sign() int {
 
-	index := t.indexMostSignificantDigit()
+	index := t.indexDigit()
 
 	switch {
-	case t[index] > 0:
+	case t.trits[index] > 0:
 		return +1
 
-	case t[index] < 0:
+	case t.trits[index] < 0:
 		return -1
 	}
 
@@ -158,77 +133,115 @@ func (t *Tryte) Sign() int {
 
 func (c *Tryte) Add(a, b *Tryte) *Tryte {
 
+	var (
+		a_ts = a.trits
+		b_ts = b.trits
+		c_ts = c.trits
+	)
+
 	var carry int = 0
-	for i := 0; i < count; i++ {
 
-		temp := int(a[i]+b[i]) + carry
+	for i := 0; i < tritCount; i++ {
 
-		if temp > max_digit {
+		temp := int(a_ts[i]) + int(b_ts[i]) + carry
+
+		if temp > maxDigit {
 			temp -= base
-			carry = max_digit
-		} else if temp < min_digit {
+			carry = maxDigit
+		} else if temp < minDigit {
 			temp += base
-			carry = min_digit
+			carry = minDigit
 		} else {
 			carry = 0
 		}
 
-		c[i] = trit(temp)
+		c_ts[i] = int8(temp)
 	}
+
 	return c
 }
 
 func (c *Tryte) Sub(a, b *Tryte) *Tryte {
 
+	var (
+		a_ts = a.trits
+		b_ts = b.trits
+		c_ts = c.trits
+	)
+
 	var carry int = 0
-	for i := 0; i < count; i++ {
 
-		temp := int(a[i]-b[i]) + carry
+	for i := 0; i < tritCount; i++ {
 
-		if temp > max_digit {
+		temp := int(a_ts[i]) - int(b_ts[i]) + carry
+
+		if temp > maxDigit {
 			temp -= base
-			carry = max_digit
-		} else if temp < min_digit {
+			carry = maxDigit
+		} else if temp < minDigit {
 			temp += base
-			carry = min_digit
+			carry = minDigit
 		} else {
 			carry = 0
 		}
 
-		c[i] = trit(temp)
+		c_ts[i] = int8(temp)
 	}
+
 	return c
 }
 
 func (c *Tryte) Mul(a, b *Tryte) *Tryte {
 
 	if c == a {
-		a = a.сlone()
+		a = a.Clone()
 	}
 
 	if c == b {
-		b = b.сlone()
+		b = b.Clone()
 	}
 
-	c.SetZero()
-	for ia := 0; ia < count; ia++ {
-		carry := 0
-		for ib := 0; ib < (count - ia); ib++ {
-			temp := int(a[ia]*b[ib]+c[ia+ib]) + carry
+	c.SetInt(0)
 
-			if temp > max_digit {
+	var (
+		a_ts = a.trits
+		b_ts = b.trits
+		c_ts = c.trits
+	)
+
+	for ia := 0; ia < tritCount; ia++ {
+		carry := 0
+		for ib := 0; ib < (tritCount - ia); ib++ {
+			temp := int(a_ts[ia])*int(b_ts[ib]) + int(c_ts[ia+ib]) + carry
+
+			if temp > maxDigit {
 				temp -= base
-				carry = max_digit
-			} else if temp < min_digit {
+				carry = maxDigit
+			} else if temp < minDigit {
 				temp += base
-				carry = min_digit
+				carry = minDigit
 			} else {
 				carry = 0
 			}
 
-			c[ia+ib] = trit(temp)
+			c_ts[ia+ib] = int8(temp)
 		}
 	}
 
 	return c
+}
+
+func (quo *Tryte) QuoRem(x, y, rem *Tryte) *Tryte {
+
+	// In Work!
+
+	return quo
+}
+
+func quoRem(a, b int) (quo, rem int) {
+
+	quo = a / b
+	rem = a - quo*b
+
+	return
 }
