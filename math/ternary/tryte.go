@@ -17,7 +17,7 @@ const (
 	MaxValue = +9841 // +(3^9−1)/2
 )
 
-const prefix = "0t_"
+const prefix = "0t"
 
 var digitsSamples = [][]rune{
 	[]rune{'-', '0', '+'},
