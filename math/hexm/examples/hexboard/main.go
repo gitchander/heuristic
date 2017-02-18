@@ -4,24 +4,26 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"math"
 
 	"github.com/gitchander/cairo"
 	"github.com/gitchander/cairo/imutil"
 	"github.com/gitchander/heuristic/math/hexm"
 )
 
+const or = hexm.Angled
+
 func main() {
 
 	ims := []InfoMakePNG{
-		InfoMakePNG{"./hexboard1.png", drawHexBoard1},
-		InfoMakePNG{"./hexboard2.png", drawHexBoard2},
-		InfoMakePNG{"./hexboard3.png", drawHexBoard3},
+		InfoMakePNG{"hexboard1.png", drawHexBoard1},
+		InfoMakePNG{"hexboard2.png", drawHexBoard2},
+		InfoMakePNG{"hexboard3.png", drawHexBoard3},
+		InfoMakePNG{"orientation-flat.png", drawOrientationFlat},
+		InfoMakePNG{"orientation-angled.png", drawOrientationAngled},
 	}
 
 	for _, im := range ims {
-		err := makeImages(im)
-		if err != nil {
+		if err := makeImages(im); err != nil {
 			log.Fatal(err.Error())
 		}
 	}
@@ -80,7 +82,7 @@ func drawHexBoard1(c *cairo.Canvas) error {
 	m.Scale(radius, radius)
 	c.SetMatrix(m)
 
-	poly := hexm.VertexPolygon()
+	poly := hexm.HexVertexes(or)
 
 	cs := palettes[4]
 
@@ -92,7 +94,7 @@ func drawHexBoard1(c *cairo.Canvas) error {
 	for I := hexm.NewIterator(hm); I.HasValue(); I.Next() {
 
 		coord := I.Coord()
-		v := hexm.CoordToVector(coord)
+		v := hexm.CoordToVector(or, coord)
 
 		p := poly[len(poly)-1]
 		p = v.Add(p)
@@ -168,7 +170,7 @@ func drawHexBoard2(c *cairo.Canvas) error {
 	m.Scale(radius, radius)
 	c.SetMatrix(m)
 
-	poly := hexm.VertexPolygon()
+	poly := hexm.HexVertexes(or)
 
 	c.SetLineWidth(0.05)
 	c.SetSourceRGB(0.7, 0.7, 0.7)
@@ -176,7 +178,7 @@ func drawHexBoard2(c *cairo.Canvas) error {
 	for I := hexm.NewIterator(hm); I.HasValue(); I.Next() {
 
 		coord := I.Coord()
-		v := hexm.CoordToVector(coord)
+		v := hexm.CoordToVector(or, coord)
 
 		p := poly[len(poly)-1]
 		p = v.Add(p)
@@ -210,9 +212,9 @@ func drawHexBoard2(c *cairo.Canvas) error {
 		cs[1] = hexm.Coord{x, 0, 0}
 		cs[2] = hexm.Coord{x, 0, size.Z - 1}
 
-		vs[0] = hexm.CoordToVector(cs[0])
-		vs[1] = hexm.CoordToVector(cs[1])
-		vs[2] = hexm.CoordToVector(cs[2])
+		vs[0] = hexm.CoordToVector(or, cs[0])
+		vs[1] = hexm.CoordToVector(or, cs[1])
+		vs[2] = hexm.CoordToVector(or, cs[2])
 
 		c.MoveTo(vs[0].X, vs[0].Y)
 		c.LineTo(vs[1].X, vs[1].Y)
@@ -227,9 +229,9 @@ func drawHexBoard2(c *cairo.Canvas) error {
 		cs[1] = hexm.Coord{0, y, 0}
 		cs[2] = hexm.Coord{size.X - 1, y, 0}
 
-		vs[0] = hexm.CoordToVector(cs[0])
-		vs[1] = hexm.CoordToVector(cs[1])
-		vs[2] = hexm.CoordToVector(cs[2])
+		vs[0] = hexm.CoordToVector(or, cs[0])
+		vs[1] = hexm.CoordToVector(or, cs[1])
+		vs[2] = hexm.CoordToVector(or, cs[2])
 
 		c.MoveTo(vs[0].X, vs[0].Y)
 		c.LineTo(vs[1].X, vs[1].Y)
@@ -244,9 +246,9 @@ func drawHexBoard2(c *cairo.Canvas) error {
 		cs[1] = hexm.Coord{0, 0, z}
 		cs[2] = hexm.Coord{0, size.Y - 1, z}
 
-		vs[0] = hexm.CoordToVector(cs[0])
-		vs[1] = hexm.CoordToVector(cs[1])
-		vs[2] = hexm.CoordToVector(cs[2])
+		vs[0] = hexm.CoordToVector(or, cs[0])
+		vs[1] = hexm.CoordToVector(or, cs[1])
+		vs[2] = hexm.CoordToVector(or, cs[2])
 
 		c.MoveTo(vs[0].X, vs[0].Y)
 		c.LineTo(vs[1].X, vs[1].Y)
@@ -260,7 +262,7 @@ func drawHexBoard2(c *cairo.Canvas) error {
 
 func drawHexBoard3(c *cairo.Canvas) error {
 
-	hm := hexm.NewMatrix(hexm.Coord{4, 4, 4})
+	hm := hexm.NewMatrix(hexm.Coord{5, 5, 5})
 
 	var (
 		surface = c.GetTarget()
@@ -276,19 +278,18 @@ func drawHexBoard3(c *cairo.Canvas) error {
 	m.InitIdendity()
 	m.InitTranslate(float64(nX)*0.5, float64(nY)*0.5)
 	m.Scale(radius, radius)
-	m.Rotate(math.Pi / 2)
 	c.SetMatrix(m)
 
 	c.SetLineWidth(0.03)
 
-	poly := hexm.VertexPolygon()
+	poly := hexm.HexVertexes(or)
 
 	cs := palettes[3]
 
 	for I := hexm.NewIterator(hm); I.HasValue(); I.Next() {
 
 		coord := I.Coord()
-		v := hexm.CoordToVector(coord)
+		v := hexm.CoordToVector(or, coord)
 
 		p := poly[len(poly)-1]
 		p = v.Add(p)
@@ -313,4 +314,51 @@ func drawHexBoard3(c *cairo.Canvas) error {
 
 func calcRadius(nX, nY int, size hexm.Coord) float64 {
 	return float64(min(nX, nY)) / (float64(max(size.X, size.Y, size.Z)) * 3.5)
+}
+
+func drawOrientationFlat(c *cairo.Canvas) error {
+	return drawOrientation(c, hexm.Flat)
+}
+
+func drawOrientationAngled(c *cairo.Canvas) error {
+	return drawOrientation(c, hexm.Angled)
+}
+
+func drawOrientation(c *cairo.Canvas, or hexm.Orientation) error {
+	var (
+		surface = c.GetTarget()
+		nX      = surface.GetWidth()
+		nY      = surface.GetHeight()
+	)
+
+	vs := hexm.HexVertexes(or)
+
+	radius := 0.8 * (float64(max(nX, nY)) / 2)
+
+	imutil.CanvasFillColor(c, color.White)
+
+	m := cairo.NewMatrix()
+	m.InitIdendity()
+	m.InitTranslate(float64(nX)*0.5, float64(nY)*0.5)
+	m.Scale(radius, radius)
+	c.SetMatrix(m)
+
+	c.SetLineWidth(0.03)
+	c.SetLineJoin(cairo.LINE_JOIN_ROUND)
+	c.SetLineCap(cairo.LINE_CAP_ROUND)
+
+	if len(vs) > 0 {
+
+		v := vs[len(vs)-1]
+		c.MoveTo(v.X, v.Y)
+
+		for _, v := range vs {
+			c.LineTo(v.X, v.Y)
+		}
+
+		c.SetSourceRGB(0, 0, 0)
+		c.Stroke()
+	}
+
+	return nil
 }
