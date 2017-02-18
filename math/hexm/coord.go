@@ -4,39 +4,16 @@ type Coord struct {
 	X, Y, Z int
 }
 
-func (c Coord) getError() error {
-
-	if (c.X < 0) || (c.Y < 0) || (c.Z < 0) {
-		return ErrorCoordNegativeParameter
+func (c Coord) Norm() Coord {
+	min := min3(c.X, c.Y, c.Z)
+	if min == 0 {
+		return c
 	}
-
-	if (c.X != 0) && (c.Y != 0) && (c.Z != 0) {
-		return ErrorCoordOneZeroParameter
+	return Coord{
+		X: c.X - min,
+		Y: c.Y - min,
+		Z: c.Z - min,
 	}
-
-	return nil
-}
-
-func (c *Coord) get_XYZ() (x, y, z int) {
-
-	x = c.X
-	y = c.Y
-	z = c.Z
-
-	return
-}
-
-func (c *Coord) set_XYZ(x, y, z int) {
-
-	c.X = x
-	c.Y = y
-	c.Z = z
-
-	return
-}
-
-func (c Coord) IsValid() bool {
-	return (c.getError() == nil)
 }
 
 func (a Coord) Equal(b Coord) bool {
@@ -56,6 +33,17 @@ func (a Coord) Equal(b Coord) bool {
 	return true
 }
 
-func (c Coord) IsZero() bool {
-	return (c.X == 0) && (c.Y == 0) && (c.Z == 0)
+func contained(size, c Coord) bool {
+
+	if (c.X < 0) || (c.X >= size.X) {
+		return false
+	}
+	if (c.Y < 0) || (c.Y >= size.Y) {
+		return false
+	}
+	if (c.Z < 0) || (c.Z >= size.Z) {
+		return false
+	}
+
+	return true
 }

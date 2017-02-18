@@ -1,23 +1,19 @@
 package hexm
 
 type Matrix struct {
-	s       Size
+	size    Coord
 	vs      []interface{}
 	indexXY int
 	indexYZ int
 	indexZX int
 }
 
-func NewMatrix(s Size) (*Matrix, error) {
-
-	if err := s.getError(); err != nil {
-		return nil, err
-	}
+func NewMatrix(size Coord) *Matrix {
 
 	var (
-		sizeXY = s.Dx * (s.Dy - 1)
-		sizeYZ = s.Dy * (s.Dz - 1)
-		sizeZX = s.Dz * (s.Dx - 1)
+		sizeXY = size.X * (size.Y - 1)
+		sizeYZ = size.Y * (size.Z - 1)
+		sizeZX = size.Z * (size.X - 1)
 
 		sizeXYZ = 1 + sizeXY + sizeYZ + sizeZX
 
@@ -27,35 +23,34 @@ func NewMatrix(s Size) (*Matrix, error) {
 	)
 
 	return &Matrix{
-		s:       s,
+		size:    size,
 		vs:      make([]interface{}, sizeXYZ),
 		indexXY: indexXY,
 		indexYZ: indexYZ,
 		indexZX: indexZX,
-	}, nil
+	}
 }
 
-func (m *Matrix) Size() Size {
-	return m.s
+func (m *Matrix) Size() Coord {
+	return m.size
 }
 
-func (m *Matrix) coordToIndex(c Coord) (index int, err error) {
+func (m *Matrix) coordToIndex(c Coord) (index int) {
 
-	if !m.s.Сontained(c) {
-		err = ErrorSizeOutOfRange
-		return
+	if !contained(m.size, c) {
+		return -1
 	}
 
 	switch {
 
 	case (c.X == 0 && c.Z > 0): // matrix yz
-		index = m.indexYZ + ((c.Z-1)*m.s.Dy + c.Y)
+		index = m.indexYZ + ((c.Z-1)*m.size.Y + c.Y)
 
 	case (c.Y == 0 && c.X > 0): // matrix zx
-		index = m.indexZX + ((c.X-1)*m.s.Dz + c.Z)
+		index = m.indexZX + ((c.X-1)*m.size.Z + c.Z)
 
 	case (c.Z == 0 && c.Y > 0): // matrix xy
-		index = m.indexXY + ((c.Y-1)*m.s.Dx + c.X)
+		index = m.indexXY + ((c.Y-1)*m.size.X + c.X)
 
 	default:
 		index = 0
@@ -64,22 +59,7 @@ func (m *Matrix) coordToIndex(c Coord) (index int, err error) {
 	return
 }
 
-// quo = x / y
-// rem = x % y
-func quoRem(x, y int) (quo, rem int) {
-
-	quo = x / y
-	rem = x - quo*y
-
-	return
-}
-
-func (m *Matrix) indexToCoord(index int) (c Coord, err error) {
-
-	if !m.indexIsValid(index) {
-		err = ErrorIndexIsNotValid
-		return
-	}
+func (m *Matrix) indexToCoord(index int) Coord {
 
 	var x, y, z int
 
@@ -88,21 +68,21 @@ func (m *Matrix) indexToCoord(index int) (c Coord, err error) {
 	case (index >= m.indexZX): // matrix zx
 		{
 			y = 0
-			x, z = quoRem(index-m.indexZX, m.s.Dz)
+			x, z = quoRem(index-m.indexZX, m.size.Z)
 			x++
 		}
 
 	case (index >= m.indexYZ): // matrix yz
 		{
 			x = 0
-			z, y = quoRem(index-m.indexYZ, m.s.Dy)
+			z, y = quoRem(index-m.indexYZ, m.size.Y)
 			z++
 		}
 
 	case (index >= m.indexXY): // matrix xy
 		{
 			z = 0
-			y, x = quoRem(index-m.indexXY, m.s.Dx)
+			y, x = quoRem(index-m.indexXY, m.size.X)
 			y++
 		}
 
@@ -110,46 +90,23 @@ func (m *Matrix) indexToCoord(index int) (c Coord, err error) {
 		x, y, z = 0, 0, 0
 	}
 
-	c.set_XYZ(x, y, z)
-	err = c.getError()
+	return Coord{x, y, z}
+}
 
+func (m *Matrix) Set(c Coord, v interface{}) (ok bool) {
+	index := m.coordToIndex(c)
+	if index != -1 {
+		m.vs[index] = v
+		ok = true
+	}
 	return
 }
 
-func (m *Matrix) indexIsValid(index int) bool {
-	return (index >= 0) && (index < len(m.vs))
-}
-
-func (m *Matrix) Set(c Coord, v interface{}) error {
-
-	err := c.getError()
-	if err != nil {
-		return err
+func (m *Matrix) Get(c Coord) (v interface{}, ok bool) {
+	index := m.coordToIndex(c)
+	if index != -1 {
+		v = m.vs[index]
+		ok = true
 	}
-
-	index, err := m.coordToIndex(c)
-	if err != nil {
-		return err
-	}
-
-	m.vs[index] = v
-
-	return nil
-}
-
-func (m *Matrix) Get(c Coord) (interface{}, error) {
-
-	err := c.getError()
-	if err != nil {
-		return nil, err
-	}
-
-	index, err := m.coordToIndex(c)
-	if err != nil {
-		return nil, err
-	}
-
-	v := m.vs[index]
-
-	return v, nil
+	return
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"math"
 
-	"github.com/gitchander/go-lang/cairo"
+	"github.com/gitchander/cairo"
 )
 
 type RGB struct {

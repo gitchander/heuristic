@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 
@@ -11,22 +10,18 @@ import (
 
 func main() {
 
-	s := hexm.Size{5, 5, 5}
-
-	m, err := hexm.NewMatrix(s)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
+	m := hexm.NewMatrix(hexm.Coord{5, 5, 5})
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	for I := hexm.NewIterator(m); !I.Done(); I.Next() {
-
-		I.SetCurrent(r.Intn(1000))
+	for I := hexm.NewIterator(m); I.HasValue(); I.Next() {
+		I.SetValue(r.Intn(1000))
 	}
 
-	for I := hexm.NewIterator(m); !I.Done(); I.Next() {
-		c, v, _ := I.Current()
+	for I := hexm.NewIterator(m); I.HasValue(); I.Next() {
+		var (
+			v = I.GetValue()
+			c = I.Coord()
+		)
 		fmt.Printf("coord: %v, val: %v\n", c, v)
 	}
 
@@ -36,21 +31,10 @@ func main() {
 	)
 
 	cellIndex = hexm.Coord{0, 2, 4}
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 
-	err = m.Set(cellIndex, "3254324326")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
+	m.Set(cellIndex, "3254324326")
 	cellIndex = hexm.Coord{0, 2, 4}
 
-	if !cellIndex.IsValid() {
-		log.Fatal("is not valid")
-	}
-
-	c, err = m.Get(cellIndex)
-	fmt.Println("cell val: ", c)
+	c, ok := m.Get(cellIndex)
+	fmt.Println(c, ok)
 }

@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"math"
 
-	"github.com/gitchander/go-lang/cairo"
-	"github.com/gitchander/go-lang/cairo/color"
+	"github.com/gitchander/cairo"
+	"github.com/gitchander/cairo/imutil"
 	"github.com/gitchander/heuristic/math/hexm"
 )
 
@@ -60,11 +61,7 @@ func makeImages(im InfoMakePNG) error {
 
 func drawHexBoard1(c *cairo.Canvas) error {
 
-	size := hexm.Size{5, 5, 5}
-	hm, err := hexm.NewMatrix(size)
-	if err != nil {
-		return err
-	}
+	hm := hexm.NewMatrix(hexm.Coord{5, 5, 5})
 
 	var (
 		surface = c.GetTarget()
@@ -72,8 +69,9 @@ func drawHexBoard1(c *cairo.Canvas) error {
 		nY      = surface.GetHeight()
 	)
 
-	color.CanvasFillRGB(c, color.NewRGB(1, 1, 1))
+	imutil.CanvasFillColor(c, color.White)
 
+	size := hm.Size()
 	radius := calcRadius(nX, nY, size)
 
 	m := cairo.NewMatrix()
@@ -91,11 +89,10 @@ func drawHexBoard1(c *cairo.Canvas) error {
 	c.SetLineWidth(0.03)
 
 	index := 0
-	for i := hexm.NewIterator(hm); !i.Done(); i.Next() {
+	for I := hexm.NewIterator(hm); I.HasValue(); I.Next() {
 
-		coord, _, _ := i.Current()
-
-		v, _ := hexm.CoordToVector(coord)
+		coord := I.Coord()
+		v := hexm.CoordToVector(coord)
 
 		p := poly[len(poly)-1]
 		p = v.Add(p)
@@ -153,11 +150,7 @@ func drawHexBoard1(c *cairo.Canvas) error {
 
 func drawHexBoard2(c *cairo.Canvas) error {
 
-	size := hexm.Size{5, 5, 5}
-	hm, err := hexm.NewMatrix(size)
-	if err != nil {
-		return err
-	}
+	hm := hexm.NewMatrix(hexm.Coord{5, 5, 5})
 
 	var (
 		surface = c.GetTarget()
@@ -165,9 +158,9 @@ func drawHexBoard2(c *cairo.Canvas) error {
 		nY      = surface.GetHeight()
 	)
 
-	color.CanvasFillRGB(c, color.NewRGB(1, 1, 1))
+	imutil.CanvasFillColor(c, color.White)
 
-	radius := calcRadius(nX, nY, size)
+	radius := calcRadius(nX, nY, hm.Size())
 
 	m := cairo.NewMatrix()
 	m.InitIdendity()
@@ -180,11 +173,10 @@ func drawHexBoard2(c *cairo.Canvas) error {
 	c.SetLineWidth(0.05)
 	c.SetSourceRGB(0.7, 0.7, 0.7)
 
-	for i := hexm.NewIterator(hm); !i.Done(); i.Next() {
+	for I := hexm.NewIterator(hm); I.HasValue(); I.Next() {
 
-		coord, _, _ := i.Current()
-
-		v, _ := hexm.CoordToVector(coord)
+		coord := I.Coord()
+		v := hexm.CoordToVector(coord)
 
 		p := poly[len(poly)-1]
 		p = v.Add(p)
@@ -210,15 +202,17 @@ func drawHexBoard2(c *cairo.Canvas) error {
 	c.SetLineWidth(0.06)
 	c.SetSourceRGB(0.5, 0, 0)
 
-	for x := 0; x < size.Dx; x++ {
+	size := hm.Size()
 
-		cs[0] = hexm.Coord{x, size.Dy - 1, 0}
+	for x := 0; x < size.X; x++ {
+
+		cs[0] = hexm.Coord{x, size.Y - 1, 0}
 		cs[1] = hexm.Coord{x, 0, 0}
-		cs[2] = hexm.Coord{x, 0, size.Dz - 1}
+		cs[2] = hexm.Coord{x, 0, size.Z - 1}
 
-		vs[0], _ = hexm.CoordToVector(cs[0])
-		vs[1], _ = hexm.CoordToVector(cs[1])
-		vs[2], _ = hexm.CoordToVector(cs[2])
+		vs[0] = hexm.CoordToVector(cs[0])
+		vs[1] = hexm.CoordToVector(cs[1])
+		vs[2] = hexm.CoordToVector(cs[2])
 
 		c.MoveTo(vs[0].X, vs[0].Y)
 		c.LineTo(vs[1].X, vs[1].Y)
@@ -227,15 +221,15 @@ func drawHexBoard2(c *cairo.Canvas) error {
 		c.Stroke()
 	}
 
-	for y := 0; y < size.Dy; y++ {
+	for y := 0; y < size.Y; y++ {
 
-		cs[0] = hexm.Coord{0, y, size.Dz - 1}
+		cs[0] = hexm.Coord{0, y, size.Z - 1}
 		cs[1] = hexm.Coord{0, y, 0}
-		cs[2] = hexm.Coord{size.Dx - 1, y, 0}
+		cs[2] = hexm.Coord{size.X - 1, y, 0}
 
-		vs[0], _ = hexm.CoordToVector(cs[0])
-		vs[1], _ = hexm.CoordToVector(cs[1])
-		vs[2], _ = hexm.CoordToVector(cs[2])
+		vs[0] = hexm.CoordToVector(cs[0])
+		vs[1] = hexm.CoordToVector(cs[1])
+		vs[2] = hexm.CoordToVector(cs[2])
 
 		c.MoveTo(vs[0].X, vs[0].Y)
 		c.LineTo(vs[1].X, vs[1].Y)
@@ -244,15 +238,15 @@ func drawHexBoard2(c *cairo.Canvas) error {
 		c.Stroke()
 	}
 
-	for z := 0; z < size.Dz; z++ {
+	for z := 0; z < size.Z; z++ {
 
-		cs[0] = hexm.Coord{size.Dx - 1, 0, z}
+		cs[0] = hexm.Coord{size.X - 1, 0, z}
 		cs[1] = hexm.Coord{0, 0, z}
-		cs[2] = hexm.Coord{0, size.Dy - 1, z}
+		cs[2] = hexm.Coord{0, size.Y - 1, z}
 
-		vs[0], _ = hexm.CoordToVector(cs[0])
-		vs[1], _ = hexm.CoordToVector(cs[1])
-		vs[2], _ = hexm.CoordToVector(cs[2])
+		vs[0] = hexm.CoordToVector(cs[0])
+		vs[1] = hexm.CoordToVector(cs[1])
+		vs[2] = hexm.CoordToVector(cs[2])
 
 		c.MoveTo(vs[0].X, vs[0].Y)
 		c.LineTo(vs[1].X, vs[1].Y)
@@ -266,11 +260,7 @@ func drawHexBoard2(c *cairo.Canvas) error {
 
 func drawHexBoard3(c *cairo.Canvas) error {
 
-	size := hexm.Size{4, 4, 4}
-	hm, err := hexm.NewMatrix(size)
-	if err != nil {
-		return err
-	}
+	hm := hexm.NewMatrix(hexm.Coord{4, 4, 4})
 
 	var (
 		surface = c.GetTarget()
@@ -278,9 +268,9 @@ func drawHexBoard3(c *cairo.Canvas) error {
 		nY      = surface.GetHeight()
 	)
 
-	color.CanvasFillRGB(c, color.NewRGB(1, 1, 1))
+	imutil.CanvasFillColor(c, color.White)
 
-	radius := calcRadius(nX, nY, size)
+	radius := calcRadius(nX, nY, hm.Size())
 
 	m := cairo.NewMatrix()
 	m.InitIdendity()
@@ -295,11 +285,10 @@ func drawHexBoard3(c *cairo.Canvas) error {
 
 	cs := palettes[3]
 
-	for i := hexm.NewIterator(hm); !i.Done(); i.Next() {
+	for I := hexm.NewIterator(hm); I.HasValue(); I.Next() {
 
-		coord, _, _ := i.Current()
-
-		v, _ := hexm.CoordToVector(coord)
+		coord := I.Coord()
+		v := hexm.CoordToVector(coord)
 
 		p := poly[len(poly)-1]
 		p = v.Add(p)
@@ -322,6 +311,6 @@ func drawHexBoard3(c *cairo.Canvas) error {
 	return nil
 }
 
-func calcRadius(nX, nY int, s hexm.Size) float64 {
-	return float64(min(nX, nY)) / (float64(max(s.Dx, s.Dy, s.Dz)) * 3.5)
+func calcRadius(nX, nY int, size hexm.Coord) float64 {
+	return float64(min(nX, nY)) / (float64(max(size.X, size.Y, size.Z)) * 3.5)
 }

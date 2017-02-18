@@ -49,77 +49,14 @@ func randomCoord(r *rand.Rand, min, max int) Coord {
 	return Coord{x, y, z}
 }
 
-func neighborAxis(c Coord, axis int, nd NeighborDir) (n Coord, err error) {
-
-	switch axis {
-	case 0:
-		n, err = NeighborX(c, nd)
-
-	case 1:
-		n, err = NeighborY(c, nd)
-
-	case 2:
-		n, err = NeighborZ(c, nd)
-
-	default:
-		err = errors.New("Wrong neighbor axis")
-	}
-
-	return
-}
-
-func TestCoordNeighbors(t *testing.T) {
-
-	var (
-		a, b, c Coord
-		err     error
-	)
-
-	r := newRand()
-	for i := 0; i < 1000000; i++ {
-
-		axis := r.Intn(3)
-
-		a = randomCoord(r, 0, 10000)
-
-		b, err = neighborAxis(a, axis, ND_NEGATIVE)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
-		c, err = neighborAxis(b, axis, ND_POSITIVE)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
-		if !a.Equal(c) {
-			t.Error(errors.New("not equal"))
-			return
-		}
-	}
-}
-
 func TestCoordToVector(t *testing.T) {
-
-	var (
-		a, b Coord
-		err  error
-	)
-
 	r := newRand()
 	for i := 0; i < 1000000; i++ {
-
-		a = randomCoord(r, 0, 10000)
-
-		v, _ := CoordToVector(a)
-		b, err = VectorToCoord(v)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
+		var (
+			a = randomCoord(r, 0, 10000)
+			v = CoordToVector(a)
+			b = VectorToCoord(v)
+		)
 		if !a.Equal(b) {
 			t.Error(errors.New("not equal"))
 			return

@@ -1,8 +1,6 @@
 package hexm
 
-import (
-	"math"
-)
+import "math"
 
 const (
 	sqrtThree = 1.73205080757 // sqrt(3)
@@ -50,11 +48,9 @@ func VertexPolygon() []Vector {
 	}
 }
 
-func CoordToVector(c Coord) (v Vector, err error) {
+func CoordToVector(c Coord) (v Vector) {
 
-	if err = c.getError(); err != nil {
-		return
-	}
+	c = c.Norm()
 
 	switch {
 
@@ -80,7 +76,7 @@ func CoordToVector(c Coord) (v Vector, err error) {
 	return
 }
 
-func VectorToCoord(v Vector) (Coord, error) {
+func VectorToCoord(v Vector) Coord {
 	if v.X < 0.0 {
 		if v.Y < -0.5*v.X/factorY {
 			return vectorToCoordYZ(v) // x = 0
@@ -93,7 +89,7 @@ func VectorToCoord(v Vector) (Coord, error) {
 	return vectorToCoordZX(v) // y = 0
 }
 
-func vectorToCoordXY(v Vector) (c Coord, err error) {
+func vectorToCoordXY(v Vector) Coord {
 
 	var (
 		X = v.X / factorX
@@ -107,18 +103,14 @@ func vectorToCoordXY(v Vector) (c Coord, err error) {
 
 	dx, dy := hexIndexes(X-fX, Y-fY)
 
-	c = Coord{
+	return Coord{
 		X: int(fX) + dx,
 		Y: int(fY) + dy,
 		Z: 0,
 	}
-
-	err = c.getError()
-
-	return
 }
 
-func vectorToCoordYZ(v Vector) (c Coord, err error) {
+func vectorToCoordYZ(v Vector) Coord {
 
 	var (
 		Y = -0.5 * (v.X/factorX + v.Y/factorY)
@@ -132,18 +124,14 @@ func vectorToCoordYZ(v Vector) (c Coord, err error) {
 
 	dy, dz := hexIndexes(Y-fY, Z-fZ)
 
-	c = Coord{
+	return Coord{
 		X: 0,
 		Y: int(fY) + dy,
 		Z: int(fZ) + dz,
 	}
-
-	err = c.getError()
-
-	return
 }
 
-func vectorToCoordZX(v Vector) (c Coord, err error) {
+func vectorToCoordZX(v Vector) Coord {
 
 	var (
 		Z = 0.5 * (v.Y/factorY - v.X/factorX)
@@ -157,23 +145,16 @@ func vectorToCoordZX(v Vector) (c Coord, err error) {
 
 	dz, dx := hexIndexes(Z-fZ, X-fX)
 
-	c = Coord{
+	return Coord{
 		X: int(fX) + dx,
 		Y: 0,
 		Z: int(fZ) + dz,
 	}
-
-	err = c.getError()
-
-	return
 }
 
 func vectorInCell(v Vector, c Coord) bool {
 
-	pos, err := CoordToVector(c)
-	if err != nil {
-		return false
-	}
+	pos := CoordToVector(c)
 
 	vs := VertexPolygon()
 	for i, _ := range vs {
