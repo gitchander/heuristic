@@ -17,13 +17,11 @@ func intGivenRange(r *rand.Rand, min, max int) int {
 	return min + r.Intn(max-min)
 }
 
-func TestTryteSetGet(t *testing.T) {
+func TestTs9SetGet(t *testing.T) {
 
-	a := NewTryte()
+	for i := MinInt9; i <= MaxInt9; i++ {
 
-	for i := MinValue; i <= MaxValue; i++ {
-
-		a.SetInt(i)
+		a := Ts9Int(i)
 		j := a.Int()
 
 		if i != j {
@@ -34,21 +32,16 @@ func TestTryteSetGet(t *testing.T) {
 }
 
 func TestTryteMulSimple(t *testing.T) {
-
-	a := NewTryte()
-	b := NewTryte()
-	c := NewTryte()
-
-	for x := MinValue; x <= MaxValue; x++ {
-		for y := MinValue; y <= MaxValue; y++ {
+	for x := MinInt9; x <= MaxInt9; x++ {
+		for y := MinInt9; y <= MaxInt9; y++ {
 
 			mulXY := x * y
 
-			if (mulXY >= MinValue) && (mulXY <= MaxValue) {
+			if (mulXY >= MinInt9) && (mulXY <= MaxInt9) {
 
-				a.SetInt(x)
-				b.SetInt(y)
-				c.Mul(a, b)
+				a := Ts9Int(x)
+				b := Ts9Int(y)
+				c := a.Mul(b)
 
 				tryteMulXY := c.Int()
 
@@ -63,24 +56,20 @@ func TestTryteMulSimple(t *testing.T) {
 
 func TestTryteMulRand(t *testing.T) {
 
-	a := NewTryte()
-	b := NewTryte()
-	c := NewTryte()
-
 	r := randomize()
 
 	for i := 0; i < 1000000; i++ {
 
-		x := intGivenRange(r, MinValue, MaxValue+1)
-		y := intGivenRange(r, MinValue, MaxValue+1)
+		x := intGivenRange(r, MinInt9, MaxInt9+1)
+		y := intGivenRange(r, MinInt9, MaxInt9+1)
 
 		mulXY := x * y
 
-		mulXY = a.SetInt(mulXY).Int() // normalize
+		mulXY = Ts9Int(mulXY).Int() // normalize
 
-		a.SetInt(x)
-		b.SetInt(y)
-		c.Mul(a, b)
+		a := Ts9Int(x)
+		b := Ts9Int(y)
+		c := a.Mul(b)
 
 		tryteMulXY := c.Int()
 

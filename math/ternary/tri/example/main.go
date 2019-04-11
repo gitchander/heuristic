@@ -2,19 +2,20 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gitchander/heuristic/math/ternary/tri"
 )
 
 func TriBoolExample() {
 
-	var a, b tri.Bool
+	a, err := tri.ParseBool("True")
+	checkError(err)
 
-	a = tri.StringToBool("True")
 	fmt.Println(a)
 
 	a = tri.False
-	b = tri.True
+	b := tri.True
 
 	c := a.Or(b.Not())
 
@@ -22,6 +23,12 @@ func TriBoolExample() {
 
 	fmt.Println(a.Xor(b))
 	fmt.Println()
+}
+
+func checkError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func TriBoolUnknown() {

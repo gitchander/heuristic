@@ -3,39 +3,36 @@ package main
 import (
 	"fmt"
 
-	"github.com/gitchander/heuristic/math/ternary"
+	ter "github.com/gitchander/heuristic/math/ternary"
 )
 
 func main() {
-	exampleCounter()
 	exampleSet()
+	exampleCounter()
 	exampleMul()
 }
 
+func exampleSet() {
+	x := ter.Ts9Int(-13)
+	fmt.Println(x)
+}
+
 func exampleCounter() {
-	for i := 0; i < 122; i++ {
-		n := ternary.NewTryteInt(-i)
-		p := ternary.NewTryteInt(i)
+	for i := 0; i < 100; i++ {
+		n := ter.Ts9Int(-i)
+		p := ter.Ts9Int(i)
 		fmt.Printf("%4d: %s\n", -i, n)
 		fmt.Printf("%4d: %s\n", i, p)
 		fmt.Println()
 	}
 }
 
-func exampleSet() {
-	x := ternary.NewTryte()
-	x.SetInt(-13)
-	fmt.Println(x)
-	fmt.Println()
-}
-
 func exampleMul() {
 
-	a := ternary.NewTryteInt(250)
-	b := ternary.NewTryteInt(-7)
-	c := ternary.NewTryte()
+	a := ter.Ts9Int(250)
+	b := ter.Ts9Int(-7)
 
-	c.Mul(a, b)
+	c := a.Mul(b)
 
 	fmt.Println(c)
 	fmt.Println(c.Int())

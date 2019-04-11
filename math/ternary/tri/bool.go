@@ -1,5 +1,9 @@
 package tri
 
+import (
+	"errors"
+)
+
 type Bool int
 
 // Synonyms:
@@ -119,7 +123,6 @@ func (a Bool) Not() (b Bool) {
 }
 
 func (a Bool) String() string {
-
 	s, ok := key_Bool[a]
 	if !ok {
 		s = strUnknown
@@ -127,18 +130,10 @@ func (a Bool) String() string {
 	return s
 }
 
-/*
-func (a *Bool) Parse(s string) bool {
-
-	v, ok := val_Bool[s]
+func ParseBool(s string) (Bool, error) {
+	b, ok := val_Bool[s]
 	if ok {
-		*a = v
+		return b, nil
 	}
-	return ok
-}
-*/
-
-func StringToBool(s string) Bool {
-	b := val_Bool[s]
-	return b
+	return Unknown, errors.New("tri.ParseBool: invalid value")
 }
