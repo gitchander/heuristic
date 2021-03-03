@@ -1,0 +1,3 @@
+Balanced ternary:
+
+https://en.wikipedia.org/wiki/Balanced_ternary#cite_note-Knuth-6

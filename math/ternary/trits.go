@@ -1,9 +1,6 @@
 package ternary
 
-//import "bytes"
-
 const (
-	//	tritCount = 9
 	base = 3
 )
 
@@ -14,156 +11,27 @@ const (
 
 const prefix = "0t"
 
-//var digitsSamples = [][]rune{
-//	0: []rune{'-', '0', '+'},
-//	1: []rune{'N', '0', 'P'},
-//	2: []rune{'N', 'Z', 'P'},
-//	3: []rune{'\u25cf', '\u25d2', '\u25cb'}, // []rune{ '●', '◒', '○' }
-//}
+var digsBytes = [][3]byte{
+	[3]byte{'-', '0', '+'}, // '-' < '0' < '+'
+	[3]byte{'A', 'B', 'C'}, // 'A' < 'B' < 'C'
+	[3]byte{'A', 'B', 'C'}, // 'A' < 'B' < 'C'
+	[3]byte{'N', 'Z', 'P'}, // 'N' < 'Z' < 'P'
+	[3]byte{'N', '0', '1'}, // 'N' < '0' < '1'
+	[3]byte{'T', '0', '1'}, // 'T' < '0' < '1'
+}
 
-//var digs = digitsSamples[2]
+var digsRunes = [][3]rune{
+	[3]rune{'●', '◒', '○'}, // '●' < '◒' < '○'
+}
 
-//func (t *Tryte) indexDigit() (index int) {
-
-//	for i, trit := range t.trits {
-//		if trit != 0 {
-//			index = i
-//		}
-//	}
-
-//	return
-//}
-
-//// Sign return:
-//// 	-1 	if t < 0
-//// 	 0	if t == 0
-//// 	+1 	if t > 0
-//func (t *Tryte) Sign() int {
-
-//	index := t.indexDigit()
-
-//	switch {
-//	case t.trits[index] > 0:
-//		return +1
-
-//	case t.trits[index] < 0:
-//		return -1
-//	}
-
-//	return 0
-//}
-
-//func (c *Tryte) Add(a, b *Tryte) *Tryte {
-
-//	var (
-//		a_ts = a.trits
-//		b_ts = b.trits
-//		c_ts = c.trits
-//	)
-
-//	var carry int = 0
-
-//	for i := 0; i < tritCount; i++ {
-
-//		temp := int(a_ts[i]) + int(b_ts[i]) + carry
-
-//		if temp > maxDigit {
-//			temp -= base
-//			carry = maxDigit
-//		} else if temp < minDigit {
-//			temp += base
-//			carry = minDigit
-//		} else {
-//			carry = 0
-//		}
-
-//		c_ts[i] = int8(temp)
-//	}
-
-//	return c
-//}
-
-//func (c *Tryte) Sub(a, b *Tryte) *Tryte {
-
-//	var (
-//		a_ts = a.trits
-//		b_ts = b.trits
-//		c_ts = c.trits
-//	)
-
-//	var carry int = 0
-
-//	for i := 0; i < tritCount; i++ {
-
-//		temp := int(a_ts[i]) - int(b_ts[i]) + carry
-
-//		if temp > maxDigit {
-//			temp -= base
-//			carry = maxDigit
-//		} else if temp < minDigit {
-//			temp += base
-//			carry = minDigit
-//		} else {
-//			carry = 0
-//		}
-
-//		c_ts[i] = int8(temp)
-//	}
-
-//	return c
-//}
-
-//func (c *Tryte) Mul(a, b *Tryte) *Tryte {
-
-//	if c == a {
-//		a = a.Clone()
-//	}
-
-//	if c == b {
-//		b = b.Clone()
-//	}
-
-//	c.SetInt(0)
-
-//	var (
-//		a_ts = a.trits
-//		b_ts = b.trits
-//		c_ts = c.trits
-//	)
-
-//	for ia := 0; ia < tritCount; ia++ {
-//		carry := 0
-//		for ib := 0; ib < (tritCount - ia); ib++ {
-//			temp := int(a_ts[ia])*int(b_ts[ib]) + int(c_ts[ia+ib]) + carry
-
-//			if temp > maxDigit {
-//				temp -= base
-//				carry = maxDigit
-//			} else if temp < minDigit {
-//				temp += base
-//				carry = minDigit
-//			} else {
-//				carry = 0
-//			}
-
-//			c_ts[ia+ib] = int8(temp)
-//		}
-//	}
-
-//	return c
-//}
-
-func quoRem(a, b int) (quo, rem int) {
-	quo = a / b
-	rem = a - quo*b
-	return
+func tritsToString(trits []int8) string {
+	return toStringBytes(trits)
+	//return toStringRunes(trits)
 }
 
 func toStringBytes(trits []int8) string {
 
-	var digs = []byte{'A', 'B', 'C'} // A < B < C
-	//var digs = []byte{'N', 'Z', 'P'} // N < Z < P
-	//var digs = []byte{'-', '0', '+'} // '-' < 0 < '+'
+	var digs = digsBytes[5]
 
 	plen := len(prefix)
 	n := len(trits)
@@ -195,10 +63,7 @@ func toStringBytes(trits []int8) string {
 
 func toStringRunes(trits []int8) string {
 
-	//var digs = []rune{'A', 'B', 'C'} // A < B < C
-	//var digs = []byte{'N', 'Z', 'P'} // N < Z < P
-	//var digs = []byte{'-', '0', '+'} // '-' < 0 < '+'
-	var digs = []rune{'●', '◒', '○'}
+	var digs = digsRunes[0]
 
 	rsPrefix := []rune(prefix)
 
@@ -262,6 +127,12 @@ func setInt(trits []int8, v int) {
 			ts[i] = 0
 		}
 	}
+}
+
+func quoRem(a, b int) (quo, rem int) {
+	quo = a / b
+	rem = a % b
+	return
 }
 
 func add(a, b, c []int8, n int) {

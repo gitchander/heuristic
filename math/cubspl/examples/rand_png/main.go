@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/gitchander/go-lang/cairo"
+	"github.com/gitchander/cairo"
 	"github.com/gitchander/heuristic/math/cubspl"
 )
 

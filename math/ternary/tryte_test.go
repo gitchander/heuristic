@@ -6,14 +6,11 @@ import (
 	"time"
 )
 
-func randomize() *rand.Rand {
+func newRandNow() *rand.Rand {
 	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func intGivenRange(r *rand.Rand, min, max int) int {
-	if min > max {
-		min, max = max, min
-	}
+func randByInterval(r *rand.Rand, min, max int) int {
 	return min + r.Intn(max-min)
 }
 
@@ -56,12 +53,17 @@ func TestTryteMulSimple(t *testing.T) {
 
 func TestTryteMulRand(t *testing.T) {
 
-	r := randomize()
+	r := newRandNow()
+
+	var (
+		min = MinInt9
+		max = MaxInt9 + 1
+	)
 
 	for i := 0; i < 1000000; i++ {
 
-		x := intGivenRange(r, MinInt9, MaxInt9+1)
-		y := intGivenRange(r, MinInt9, MaxInt9+1)
+		x := randByInterval(r, min, max)
+		y := randByInterval(r, min, max)
 
 		mulXY := x * y
 

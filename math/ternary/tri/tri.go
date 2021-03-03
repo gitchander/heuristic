@@ -4,16 +4,16 @@ import (
 	"errors"
 )
 
-type Bool int
-
 // Synonyms:
-//		Tribool
-//		Trilean
+// Tribool
+// Trilean
+
+type Tri int
 
 const (
-	Unknown Bool = iota
-	True
-	False
+	False   Tri = -1
+	Unknown Tri = 0
+	True    Tri = 1
 )
 
 const (
@@ -23,13 +23,13 @@ const (
 )
 
 var (
-	key_Bool = map[Bool]string{
+	keyTri = map[Tri]string{
 		Unknown: strUnknown,
 		True:    strTrue,
 		False:   strFalse,
 	}
 
-	val_Bool = map[string]Bool{
+	valTri = map[string]Tri{
 		strUnknown: Unknown,
 		strTrue:    True,
 		strFalse:   False,
@@ -43,7 +43,7 @@ var (
 //    T | T T T |
 //    U | U T U |
 //---------------
-func (a Bool) Or(b Bool) (c Bool) {
+func (a Tri) Or(b Tri) (c Tri) {
 
 	switch {
 	case (a == True) || (b == True):
@@ -63,7 +63,7 @@ func (a Bool) Or(b Bool) (c Bool) {
 //    T | F T U |
 //    U | F U U |
 //---------------
-func (a Bool) And(b Bool) (c Bool) {
+func (a Tri) And(b Tri) (c Tri) {
 
 	switch {
 	case (a == False) || (b == False):
@@ -83,7 +83,7 @@ func (a Bool) And(b Bool) (c Bool) {
 //    T | T F U |
 //    U | U U U |
 //---------------
-func (a Bool) Xor(b Bool) (c Bool) {
+func (a Tri) Xor(b Tri) (c Tri) {
 
 	switch a {
 	case True:
@@ -110,7 +110,7 @@ func (a Bool) Xor(b Bool) (c Bool) {
 	return
 }
 
-func (a Bool) Not() (b Bool) {
+func (a Tri) Not() (b Tri) {
 
 	switch a {
 	case False:
@@ -122,18 +122,18 @@ func (a Bool) Not() (b Bool) {
 	return
 }
 
-func (a Bool) String() string {
-	s, ok := key_Bool[a]
+func (a Tri) String() string {
+	s, ok := keyTri[a]
 	if !ok {
 		s = strUnknown
 	}
 	return s
 }
 
-func ParseBool(s string) (Bool, error) {
-	b, ok := val_Bool[s]
+func ParseTri(s string) (Tri, error) {
+	b, ok := valTri[s]
 	if ok {
 		return b, nil
 	}
-	return Unknown, errors.New("tri.ParseBool: invalid value")
+	return Unknown, errors.New("tri.ParseTri: invalid value")
 }

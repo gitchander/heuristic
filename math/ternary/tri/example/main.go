@@ -7,9 +7,9 @@ import (
 	"github.com/gitchander/heuristic/math/ternary/tri"
 )
 
-func TriBoolExample() {
+func TriExample() {
 
-	a, err := tri.ParseBool("True")
+	a, err := tri.ParseTri("True")
 	checkError(err)
 
 	fmt.Println(a)
@@ -31,9 +31,9 @@ func checkError(err error) {
 	}
 }
 
-func TriBoolUnknown() {
+func TriUnknown() {
 
-	var a tri.Bool
+	var a tri.Tri
 
 	if a == tri.True {
 		fmt.Println("true")
@@ -52,6 +52,6 @@ func TriBoolUnknown() {
 }
 
 func main() {
-	TriBoolExample()
-	TriBoolUnknown()
+	TriExample()
+	TriUnknown()
 }

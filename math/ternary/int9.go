@@ -5,8 +5,9 @@ const (
 	MaxInt9 = +9841 // +(3^9−1)/2
 )
 
-// synonym: Tryte9
+// tritCount = 9
 
+// synonym: Tryte9
 type Ts9 [9]int8
 
 func Ts9Int(v int) (t Ts9) {
@@ -15,8 +16,7 @@ func Ts9Int(v int) (t Ts9) {
 }
 
 func (t Ts9) String() string {
-	return toStringBytes(t[:])
-	//return toStringRunes(t[:])
+	return tritsToString(t[:])
 }
 
 func (t Ts9) Int() int {

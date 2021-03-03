@@ -2,14 +2,14 @@ package tri
 
 import "testing"
 
-const anyOther Bool = 100 // -> Unknown
+const anyOther Tri = 100 // -> Unknown
 
 type unaryOperatorSample struct {
-	a, b Bool // b= a.operator()
+	a, b Tri // b= a.operator()
 }
 
 type binaryOperatorSample struct {
-	a, b, c Bool // c= a.operator(b)
+	a, b, c Tri // c= a.operator(b)
 }
 
 var not_Samples = []unaryOperatorSample{
@@ -89,9 +89,9 @@ var xor_Samples = []binaryOperatorSample{
 	{anyOther, anyOther, Unknown},
 }
 
-func TestBool(t *testing.T) {
+func TestTri(t *testing.T) {
 
-	var a, b, c Bool
+	var a, b, c Tri
 
 	for _, s := range not_Samples {
 
